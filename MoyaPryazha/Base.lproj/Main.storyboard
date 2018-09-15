@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14313.18" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="75d-uB-LHk">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14283.14"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <customFonts key="customFonts">
+        <array key="AaarghBold.ttf">
+            <string>AaarghCyrillicBold</string>
+        </array>
+    </customFonts>
+    <scenes>
+        <!--Каталог-->
+        <scene sceneID="6T6-Hv-6eF">
+            <objects>
+                <viewController id="bWK-ai-ptl" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="PxF-dM-YzY">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" red="0.98823529409999999" green="0.64705882349999999" blue="0.023529411760000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <viewLayoutGuide key="safeArea" id="zvd-ff-4tJ"/>
+                    </view>
+                    <tabBarItem key="tabBarItem" title="Каталог" image="Catalog" id="f4a-QG-R2p"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="qao-J5-NLP" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-414" y="-155"/>
+        </scene>
+        <!--Главная-->
+        <scene sceneID="6LH-d5-4tJ">
+            <objects>
+                <viewController id="VBo-ju-0XO" customClass="MainViewController" customModule="MoyaPryazha" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="rq8-aR-C3W">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="MPBackground" translatesAutoresizingMaskIntoConstraints="NO" id="X4v-w6-kRM">
+                                <rect key="frame" x="0.0" y="64" width="375" height="554"/>
+                            </imageView>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="8sU-qz-ffu">
+                                <rect key="frame" x="0.0" y="64" width="375" height="554"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Хиты продаж" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ANH-kO-jzR">
+                                        <rect key="frame" x="0.0" y="0.0" width="375" height="40"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="40" id="08F-Zl-gq4"/>
+                                        </constraints>
+                                        <fontDescription key="fontDescription" name="AaarghCyrillicBold" family="Aaargh" pointSize="27"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="FhD-i9-JIB">
+                                        <rect key="frame" x="0.0" y="40" width="375" height="514"/>
+                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <prototypes>
+                                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="HitCell" rowHeight="129" id="bbO-Ad-Eu6" customClass="HitTableViewCell" customModule="MoyaPryazha" customModuleProvider="target">
+                                                <rect key="frame" x="0.0" y="28" width="375" height="129"/>
+                                                <autoresizingMask key="autoresizingMask"/>
+                                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="bbO-Ad-Eu6" id="99k-s1-Bzt">
+                                                    <rect key="frame" x="0.0" y="0.0" width="375" height="128.5"/>
+                                                    <autoresizingMask key="autoresizingMask"/>
+                                                    <subviews>
+                                                        <stackView opaque="NO" contentMode="scaleToFill" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="eEj-fn-Mmd">
+                                                            <rect key="frame" x="15" y="10" width="344" height="80"/>
+                                                            <subviews>
+                                                                <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="bqv-B3-6SO">
+                                                                    <rect key="frame" x="0.0" y="0.0" width="55" height="80"/>
+                                                                    <constraints>
+                                                                        <constraint firstAttribute="width" constant="55" id="DXY-Dk-iH4"/>
+                                                                        <constraint firstAttribute="height" constant="80" id="Lg6-3k-7kf"/>
+                                                                    </constraints>
+                                                                </imageView>
+                                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="LANA GATTO MAXI SOFT небесно-голубой (12260)" textAlignment="center" lineBreakMode="wordWrap" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="mVL-Gr-5Eu">
+                                                                    <rect key="frame" x="63" y="0.0" width="281" height="80"/>
+                                                                    <fontDescription key="fontDescription" name="AaarghCyrillicBold" family="Aaargh" pointSize="18"/>
+                                                                    <nil key="textColor"/>
+                                                                    <nil key="highlightedColor"/>
+                                                                </label>
+                                                            </subviews>
+                                                            <constraints>
+                                                                <constraint firstItem="mVL-Gr-5Eu" firstAttribute="leading" secondItem="bqv-B3-6SO" secondAttribute="trailing" constant="8" id="VCl-uq-ry3"/>
+                                                            </constraints>
+                                                        </stackView>
+                                                        <stackView opaque="NO" contentMode="scaleToFill" spacing="28" translatesAutoresizingMaskIntoConstraints="NO" id="Jbl-ia-ReC">
+                                                            <rect key="frame" x="16" y="95" width="343" height="31"/>
+                                                            <subviews>
+                                                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="fhg-Fx-9sZ">
+                                                                    <rect key="frame" x="0.0" y="0.0" width="157.5" height="31"/>
+                                                                    <color key="backgroundColor" red="0.3411764706" green="0.64313725489999995" blue="0.015686274510000001" alpha="1" colorSpace="calibratedRGB"/>
+                                                                    <fontDescription key="fontDescription" name="AaarghCyrillicBold" family="Aaargh" pointSize="14"/>
+                                                                    <state key="normal" title="Купить на сайте">
+                                                                        <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                                    </state>
+                                                                    <connections>
+                                                                        <action selector="goToSite:" destination="bbO-Ad-Eu6" eventType="touchUpInside" id="eGa-Br-nJ5"/>
+                                                                    </connections>
+                                                                </button>
+                                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="220.00 руб" textAlignment="right" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Qqv-tA-7l9">
+                                                                    <rect key="frame" x="185.5" y="0.0" width="157.5" height="31"/>
+                                                                    <fontDescription key="fontDescription" name="AaarghCyrillicBold" family="Aaargh" pointSize="22"/>
+                                                                    <nil key="textColor"/>
+                                                                    <nil key="highlightedColor"/>
+                                                                </label>
+                                                            </subviews>
+                                                        </stackView>
+                                                    </subviews>
+                                                    <constraints>
+                                                        <constraint firstItem="eEj-fn-Mmd" firstAttribute="leading" secondItem="99k-s1-Bzt" secondAttribute="leading" constant="15" id="2dw-dq-aYt"/>
+                                                        <constraint firstItem="Jbl-ia-ReC" firstAttribute="top" secondItem="eEj-fn-Mmd" secondAttribute="bottom" constant="5" id="7ra-JI-tUE"/>
+                                                        <constraint firstAttribute="trailing" secondItem="eEj-fn-Mmd" secondAttribute="trailing" constant="16" id="7xa-hn-YfJ"/>
+                                                        <constraint firstAttribute="trailing" secondItem="Jbl-ia-ReC" secondAttribute="trailing" constant="16" id="9J9-JX-gU0"/>
+                                                        <constraint firstItem="eEj-fn-Mmd" firstAttribute="top" secondItem="99k-s1-Bzt" secondAttribute="top" constant="10" id="VZJ-bw-Kwg"/>
+                                                        <constraint firstItem="Jbl-ia-ReC" firstAttribute="leading" secondItem="99k-s1-Bzt" secondAttribute="leading" constant="16" id="mGK-Og-XgD"/>
+                                                        <constraint firstAttribute="bottom" secondItem="Jbl-ia-ReC" secondAttribute="bottom" constant="2.5" id="zIb-ks-Qb8"/>
+                                                    </constraints>
+                                                </tableViewCellContentView>
+                                                <connections>
+                                                    <outlet property="nameLabel" destination="mVL-Gr-5Eu" id="0sg-IV-xkr"/>
+                                                    <outlet property="previewImage" destination="bqv-B3-6SO" id="BIG-9l-28P"/>
+                                                    <outlet property="priceLabel" destination="Qqv-tA-7l9" id="z1c-EY-QLH"/>
+                                                    <outlet property="siteButton" destination="fhg-Fx-9sZ" id="was-wF-loG"/>
+                                                </connections>
+                                            </tableViewCell>
+                                        </prototypes>
+                                        <connections>
+                                            <outlet property="dataSource" destination="VBo-ju-0XO" id="M5K-pe-i9K"/>
+                                            <outlet property="delegate" destination="VBo-ju-0XO" id="Jt0-T9-SoF"/>
+                                        </connections>
+                                    </tableView>
+                                </subviews>
+                            </stackView>
+                        </subviews>
+                        <color key="backgroundColor" red="0.98823529409999999" green="0.64705882349999999" blue="0.023529411760000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="8sU-qz-ffu" firstAttribute="trailing" secondItem="KZC-39-Zor" secondAttribute="trailing" id="O7N-Fy-c9k"/>
+                            <constraint firstItem="KZC-39-Zor" firstAttribute="bottom" secondItem="X4v-w6-kRM" secondAttribute="bottom" id="URQ-Vx-BAb"/>
+                            <constraint firstItem="X4v-w6-kRM" firstAttribute="leading" secondItem="KZC-39-Zor" secondAttribute="leading" id="UyN-ha-rsx"/>
+                            <constraint firstItem="8sU-qz-ffu" firstAttribute="leading" secondItem="KZC-39-Zor" secondAttribute="leading" id="fR3-Tx-afx"/>
+                            <constraint firstItem="X4v-w6-kRM" firstAttribute="top" secondItem="KZC-39-Zor" secondAttribute="top" id="qt4-cc-rnC"/>
+                            <constraint firstItem="X4v-w6-kRM" firstAttribute="trailing" secondItem="KZC-39-Zor" secondAttribute="trailing" id="th4-M3-sr0"/>
+                            <constraint firstItem="8sU-qz-ffu" firstAttribute="top" secondItem="KZC-39-Zor" secondAttribute="top" id="xiT-Zl-wHJ"/>
+                            <constraint firstItem="8sU-qz-ffu" firstAttribute="bottom" secondItem="KZC-39-Zor" secondAttribute="bottom" id="zuv-uW-ZQA"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="KZC-39-Zor"/>
+                    </view>
+                    <navigationItem key="navigationItem" title="Главная" id="elT-zz-wX9"/>
+                    <connections>
+                        <outlet property="headerLabel" destination="ANH-kO-jzR" id="jxK-Xf-BaX"/>
+                        <outlet property="hitTableView" destination="FhD-i9-JIB" id="aqi-sW-50l"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="c1L-jE-QgD" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="580" y="-851.42428785607206"/>
+        </scene>
+        <!--Tab Bar Controller-->
+        <scene sceneID="yWu-Go-P7N">
+            <objects>
+                <tabBarController id="o8b-ZV-NmK" sceneMemberID="viewController">
+                    <tabBar key="tabBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="1zK-M8-fEK">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="49"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <color key="barTintColor" red="0.98823529409999999" green="0.64705882349999999" blue="0.023529411760000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <color key="selectedImageTintColor" red="0.3411764706" green="0.64313725489999995" blue="0.015686274510000001" alpha="1" colorSpace="calibratedRGB"/>
+                    </tabBar>
+                    <connections>
+                        <segue destination="0R1-uR-jyY" kind="relationship" relationship="viewControllers" id="Tzz-pE-tK3"/>
+                        <segue destination="bWK-ai-ptl" kind="relationship" relationship="viewControllers" id="J2h-aP-d2E"/>
+                    </connections>
+                </tabBarController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Bg9-mT-cvd" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1156" y="-745"/>
+        </scene>
+        <!--Главная-->
+        <scene sceneID="2w9-Lm-tcA">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="0R1-uR-jyY" sceneMemberID="viewController">
+                    <tabBarItem key="tabBarItem" title="Главная" image="Home" id="f7a-Yf-4Q9"/>
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="90d-5D-XeX">
+                        <rect key="frame" x="0.0" y="20" width="375" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <color key="backgroundColor" red="0.98823529409999999" green="0.64705882349999999" blue="0.023529411760000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <textAttributes key="titleTextAttributes">
+                            <fontDescription key="fontDescription" name="ArialMT" family="Arial" pointSize="24"/>
+                            <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        </textAttributes>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="VBo-ju-0XO" kind="relationship" relationship="rootViewController" id="kBA-mw-GfI"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="ot5-DR-kgc" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-414.375" y="-850"/>
+        </scene>
+        <!--Load View Controller-->
+        <scene sceneID="JVu-sg-CVV">
+            <objects>
+                <viewController id="75d-uB-LHk" customClass="LoadViewController" customModule="MoyaPryazha" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="lFk-Qv-aKA">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="MPLaunchScreen" translatesAutoresizingMaskIntoConstraints="NO" id="myn-Gk-OVt">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                            </imageView>
+                            <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" progress="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="zrY-iE-Mbc">
+                                <rect key="frame" x="56" y="615" width="263" height="2"/>
+                                <color key="tintColor" red="0.3411764706" green="0.64313725489999995" blue="0.015686274510000001" alpha="1" colorSpace="calibratedRGB"/>
+                            </progressView>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="zrY-iE-Mbc" firstAttribute="leading" secondItem="lFk-Qv-aKA" secondAttribute="leadingMargin" constant="40" id="0c1-ov-Tlk"/>
+                            <constraint firstItem="myn-Gk-OVt" firstAttribute="leading" secondItem="8Gp-aI-IM2" secondAttribute="leading" id="MEg-M3-eEN"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="zrY-iE-Mbc" secondAttribute="trailing" constant="40" id="XUe-h6-ucX"/>
+                            <constraint firstItem="myn-Gk-OVt" firstAttribute="top" secondItem="lFk-Qv-aKA" secondAttribute="top" id="ld6-lH-Odj"/>
+                            <constraint firstItem="8Gp-aI-IM2" firstAttribute="bottom" secondItem="zrY-iE-Mbc" secondAttribute="bottom" constant="50" id="nFY-Gr-eQQ"/>
+                            <constraint firstItem="myn-Gk-OVt" firstAttribute="bottom" secondItem="8Gp-aI-IM2" secondAttribute="bottom" id="rdW-DZ-Bf1"/>
+                            <constraint firstItem="myn-Gk-OVt" firstAttribute="trailing" secondItem="8Gp-aI-IM2" secondAttribute="trailing" id="yng-dW-qEW"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="8Gp-aI-IM2"/>
+                    </view>
+                    <connections>
+                        <outlet property="loadProgressView" destination="zrY-iE-Mbc" id="Tax-hU-mnF"/>
+                        <segue destination="o8b-ZV-NmK" kind="show" identifier="ToMainSegue" id="NXo-T2-6KX"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="eX1-7y-i9n" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1855.2" y="-745.27736131934034"/>
+        </scene>
+    </scenes>
+    <resources>
+        <image name="Catalog" width="25" height="25"/>
+        <image name="Home" width="25" height="25"/>
+        <image name="MPBackground" width="1024" height="768"/>
+        <image name="MPLaunchScreen" width="375" height="667"/>
+    </resources>
+</document>

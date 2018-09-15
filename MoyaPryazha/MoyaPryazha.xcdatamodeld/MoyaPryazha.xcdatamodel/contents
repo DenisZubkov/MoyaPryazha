@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="14315.2.4" systemVersion="18A384a" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="Category" representedClassName="Category" syncable="YES" codeGenerationType="class">
+        <attribute name="desc" optional="YES" attributeType="Binary" syncable="YES"/>
+        <attribute name="id" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="order" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="parentId" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="picture" optional="YES" attributeType="Binary" syncable="YES"/>
+        <attribute name="thumbnail" optional="YES" attributeType="Binary" syncable="YES"/>
+        <relationship name="products" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Product" inverseName="category" inverseEntity="Product" syncable="YES"/>
+    </entity>
+    <entity name="Currency" representedClassName="Currency" syncable="YES" codeGenerationType="class">
+        <attribute name="code" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="id" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="numericCode" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="symbol" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="prices" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Price" inverseName="currency" inverseEntity="Price" syncable="YES"/>
+    </entity>
+    <entity name="Hit" representedClassName="Hit" syncable="YES" codeGenerationType="class">
+        <attribute name="order" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <relationship name="product" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Product" inverseName="hit" inverseEntity="Product" syncable="YES"/>
+    </entity>
+    <entity name="Parameter" representedClassName="Parameter" syncable="YES" codeGenerationType="class">
+        <attribute name="id" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="order" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="tip" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="productParameters" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="ProductParameter" inverseName="parameter" inverseEntity="ProductParameter" syncable="YES"/>
+    </entity>
+    <entity name="Price" representedClassName="Price" syncable="YES" codeGenerationType="class">
+        <attribute name="id" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="price" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES" syncable="YES"/>
+        <relationship name="currency" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Currency" inverseName="prices" inverseEntity="Currency" syncable="YES"/>
+        <relationship name="priceType" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="PriceType" inverseName="prices" inverseEntity="PriceType" syncable="YES"/>
+        <relationship name="product" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Product" inverseName="prices" inverseEntity="Product" syncable="YES"/>
+    </entity>
+    <entity name="PriceType" representedClassName="PriceType" syncable="YES" codeGenerationType="class">
+        <attribute name="id" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="prices" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Price" inverseName="priceType" inverseEntity="Price" syncable="YES"/>
+    </entity>
+    <entity name="Product" representedClassName="Product" syncable="YES" codeGenerationType="class">
+        <attribute name="desc" optional="YES" attributeType="Binary" syncable="YES"/>
+        <attribute name="id" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="name" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="thumbnail" optional="YES" attributeType="Binary" syncable="YES"/>
+        <attribute name="thumbnailPath" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="category" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Category" inverseName="products" inverseEntity="Category" syncable="YES"/>
+        <relationship name="hit" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Hit" inverseName="product" inverseEntity="Hit" syncable="YES"/>
+        <relationship name="pictures" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="ProductPicture" inverseName="product" inverseEntity="ProductPicture" syncable="YES"/>
+        <relationship name="prices" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Price" inverseName="product" inverseEntity="Price" syncable="YES"/>
+        <relationship name="productParameters" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="ProductParameter" inverseName="product" inverseEntity="ProductParameter" syncable="YES"/>
+    </entity>
+    <entity name="ProductParameter" representedClassName="ProductParameter" syncable="YES" codeGenerationType="class">
+        <attribute name="id" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="value" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="parameter" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Parameter" inverseName="productParameters" inverseEntity="Parameter" syncable="YES"/>
+        <relationship name="product" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Product" inverseName="productParameters" inverseEntity="Product" syncable="YES"/>
+    </entity>
+    <entity name="ProductPicture" representedClassName="ProductPicture" syncable="YES" codeGenerationType="class">
+        <attribute name="id" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="image" optional="YES" attributeType="Binary" syncable="YES"/>
+        <attribute name="order" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="path" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="product" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Product" inverseName="pictures" inverseEntity="Product" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="Category" positionX="-1138.8203125" positionY="-344.99609375" width="128" height="163"/>
+        <element name="Currency" positionX="-560.52734375" positionY="135.78515625" width="128" height="133"/>
+        <element name="Parameter" positionX="-344.734375" positionY="6.94921875" width="128" height="118"/>
+        <element name="Price" positionX="-915.76171875" positionY="-58.82421875" width="128" height="118"/>
+        <element name="PriceType" positionX="-1136.41796875" positionY="8.5078125" width="128" height="88"/>
+        <element name="Product" positionX="-748.99609375" positionY="-330.36328125" width="128" height="195"/>
+        <element name="ProductParameter" positionX="-498.8828125" positionY="-64.640625" width="128" height="103"/>
+        <element name="ProductPicture" positionX="-549.00390625" positionY="-315.546875" width="128" height="118"/>
+        <element name="Hit" positionX="-1108.26171875" positionY="-142.1484375" width="128" height="75"/>
+    </elements>
+</model>
