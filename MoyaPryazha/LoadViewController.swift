@@ -29,7 +29,7 @@ class LoadViewController: UIViewController {
     }
     
     func getData(url: URL) -> Data? {
-        let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 10)
+        let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: 10)
         var dataLoad: Data?
         var isLoad = false
         let dataTask = URLSession.shared.dataTask(with: request) { data, response, error in
