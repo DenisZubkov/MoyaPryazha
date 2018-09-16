@@ -11,11 +11,12 @@ import Foundation
 
 struct CategoryJSON: Codable {
     let id, parentId, name, descriprion: String
-    let picture, thumbnail: String
+    let picture, thumbnail, order: String
     
     enum CodingKeys: String, CodingKey {
         case id
         case parentId = "parentId"
         case name, descriprion, picture, thumbnail
+        case order = "ordering"
     }
 }

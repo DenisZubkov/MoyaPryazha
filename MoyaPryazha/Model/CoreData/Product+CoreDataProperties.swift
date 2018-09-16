@@ -2,7 +2,7 @@
 //  Product+CoreDataProperties.swift
 //  MoyaPryazha
 //
-//  Created by Dennis Zubkoff on 14/09/2018.
+//  Created by Dennis Zubkoff on 16/09/2018.
 //  Copyright © 2018 Dennis Zubkoff. All rights reserved.
 //
 //
@@ -19,9 +19,10 @@ extension Product {
 
     @NSManaged public var desc: NSData?
     @NSManaged public var id: Int32
-    @NSManaged public var name: Int32
+    @NSManaged public var name: String?
     @NSManaged public var thumbnail: NSData?
     @NSManaged public var thumbnailPath: String?
+    @NSManaged public var order: Int32
     @NSManaged public var category: Category?
     @NSManaged public var hit: Hit?
     @NSManaged public var pictures: NSSet?

@@ -9,11 +9,23 @@
 import Foundation
 
 struct ProductJSON: Codable {
-    let id, name, price, thumbnail: String
-    let picture, description, categoryId: String
+    let id: String
+    let name: String
+    let price: String?
+    let thumbnail: String
+    let picture: String
+    let description: String
+    let ordered: String
+    let categoryId: String
     
     enum CodingKeys: String, CodingKey {
-        case id, name, price, thumbnail, picture, description
-        case categoryId = "categoryId"
+        case id
+        case name
+        case price
+        case thumbnail
+        case picture
+        case description
+        case ordered
+        case categoryId
     }
 }

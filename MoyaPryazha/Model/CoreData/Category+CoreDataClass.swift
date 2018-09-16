@@ -2,7 +2,7 @@
 //  Category+CoreDataClass.swift
 //  MoyaPryazha
 //
-//  Created by Dennis Zubkoff on 14/09/2018.
+//  Created by Dennis Zubkoff on 16/09/2018.
 //  Copyright © 2018 Dennis Zubkoff. All rights reserved.
 //
 //
