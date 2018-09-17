@@ -1,5 +1,5 @@
 //
-//  ProductCategory.swift
+//  CategoryJSON.swift
 //  MoyaPryazha
 //
 //  Created by Dennis Zubkoff on 14/09/2018.

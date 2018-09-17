@@ -8,8 +8,13 @@
 
 /* Begin PBXBuildFile section */
 		7A0629E8214C51E6009EA4B3 /* GlobalConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A0629E7214C51E6009EA4B3 /* GlobalConstants.swift */; };
+		7A11F3C4214ED08A005184F7 /* PriceJSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A11F3C3214ED08A005184F7 /* PriceJSON.swift */; };
+		7A11F3C6214ED380005184F7 /* CurrencyJSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A11F3C5214ED380005184F7 /* CurrencyJSON.swift */; };
+		7A11F3C8214ED45D005184F7 /* ParameterJSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A11F3C7214ED45D005184F7 /* ParameterJSON.swift */; };
+		7A11F3CA214ED4A0005184F7 /* HitJSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A11F3C9214ED4A0005184F7 /* HitJSON.swift */; };
+		7A11F3CC214ED4B6005184F7 /* ProductPictureJSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A11F3CB214ED4B6005184F7 /* ProductPictureJSON.swift */; };
 		7A131F68214BFFDF0082FAAB /* CategoryJSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A131F67214BFFDF0082FAAB /* CategoryJSON.swift */; };
-		7A131F6A214C01DE0082FAAB /* ProductParamsJSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A131F69214C01DE0082FAAB /* ProductParamsJSON.swift */; };
+		7A131F6A214C01DE0082FAAB /* ProductParameterJSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A131F69214C01DE0082FAAB /* ProductParameterJSON.swift */; };
 		7A131F6E214C029A0082FAAB /* MoyaPryazha.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 7A131F6C214C029A0082FAAB /* MoyaPryazha.xcdatamodeld */; };
 		7A18B6B72144FCEF00ED55A7 /* HitTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A18B6B62144FCEF00ED55A7 /* HitTableViewCell.swift */; };
 		7A18B6B92144FF0C00ED55A7 /* ProductJSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A18B6B82144FF0C00ED55A7 /* ProductJSON.swift */; };
@@ -33,8 +38,13 @@
 		7A0629E7214C51E6009EA4B3 /* GlobalConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalConstants.swift; sourceTree = "<group>"; };
 		7A11F3BF214E5B84005184F7 /* Product+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Product+CoreDataClass.swift"; sourceTree = "<group>"; };
 		7A11F3C0214E5B84005184F7 /* Product+CoreDataProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Product+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		7A11F3C3214ED08A005184F7 /* PriceJSON.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PriceJSON.swift; sourceTree = "<group>"; };
+		7A11F3C5214ED380005184F7 /* CurrencyJSON.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyJSON.swift; sourceTree = "<group>"; };
+		7A11F3C7214ED45D005184F7 /* ParameterJSON.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParameterJSON.swift; sourceTree = "<group>"; };
+		7A11F3C9214ED4A0005184F7 /* HitJSON.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HitJSON.swift; sourceTree = "<group>"; };
+		7A11F3CB214ED4B6005184F7 /* ProductPictureJSON.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductPictureJSON.swift; sourceTree = "<group>"; };
 		7A131F67214BFFDF0082FAAB /* CategoryJSON.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryJSON.swift; sourceTree = "<group>"; };
-		7A131F69214C01DE0082FAAB /* ProductParamsJSON.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductParamsJSON.swift; sourceTree = "<group>"; };
+		7A131F69214C01DE0082FAAB /* ProductParameterJSON.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductParameterJSON.swift; sourceTree = "<group>"; };
 		7A131F6D214C029A0082FAAB /* MoyaPryazha.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = MoyaPryazha.xcdatamodel; sourceTree = "<group>"; };
 		7A18B6B62144FCEF00ED55A7 /* HitTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HitTableViewCell.swift; sourceTree = "<group>"; };
 		7A18B6B82144FF0C00ED55A7 /* ProductJSON.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductJSON.swift; sourceTree = "<group>"; };
@@ -86,9 +96,14 @@
 		7A131F6B214C02400082FAAB /* JSON */ = {
 			isa = PBXGroup;
 			children = (
-				7A18B6B82144FF0C00ED55A7 /* ProductJSON.swift */,
-				7A131F69214C01DE0082FAAB /* ProductParamsJSON.swift */,
 				7A131F67214BFFDF0082FAAB /* CategoryJSON.swift */,
+				7A18B6B82144FF0C00ED55A7 /* ProductJSON.swift */,
+				7A11F3C5214ED380005184F7 /* CurrencyJSON.swift */,
+				7A11F3C3214ED08A005184F7 /* PriceJSON.swift */,
+				7A11F3C7214ED45D005184F7 /* ParameterJSON.swift */,
+				7A131F69214C01DE0082FAAB /* ProductParameterJSON.swift */,
+				7A11F3C9214ED4A0005184F7 /* HitJSON.swift */,
+				7A11F3CB214ED4B6005184F7 /* ProductPictureJSON.swift */,
 			);
 			path = JSON;
 			sourceTree = "<group>";
@@ -100,20 +115,20 @@
 				7A720C97214E32060031EA86 /* Category+CoreDataProperties.swift */,
 				7A11F3BF214E5B84005184F7 /* Product+CoreDataClass.swift */,
 				7A11F3C0214E5B84005184F7 /* Product+CoreDataProperties.swift */,
-				7AC45A21214C230B00A9046E /* Parameter+CoreDataProperties.swift */,
-				7AC45A20214C230B00A9046E /* Parameter+CoreDataClass.swift */,
-				7AC45A1D214C230B00A9046E /* Hit+CoreDataProperties.swift */,
-				7AC45A1C214C230B00A9046E /* Hit+CoreDataClass.swift */,
-				7AC45A1B214C230B00A9046E /* ProductParameter+CoreDataProperties.swift */,
-				7AC45A1A214C230B00A9046E /* ProductParameter+CoreDataClass.swift */,
-				7AC45A19214C230B00A9046E /* PriceType+CoreDataProperties.swift */,
-				7AC45A18214C230B00A9046E /* PriceType+CoreDataClass.swift */,
-				7AC45A17214C230B00A9046E /* Price+CoreDataProperties.swift */,
-				7AC45A16214C230B00A9046E /* Price+CoreDataClass.swift */,
-				7AC45A15214C230B00A9046E /* ProductPicture+CoreDataProperties.swift */,
-				7AC45A14214C230B00A9046E /* ProductPicture+CoreDataClass.swift */,
-				7AC45A13214C230B00A9046E /* Currency+CoreDataProperties.swift */,
 				7AC45A12214C230B00A9046E /* Currency+CoreDataClass.swift */,
+				7AC45A13214C230B00A9046E /* Currency+CoreDataProperties.swift */,
+				7AC45A18214C230B00A9046E /* PriceType+CoreDataClass.swift */,
+				7AC45A19214C230B00A9046E /* PriceType+CoreDataProperties.swift */,
+				7AC45A16214C230B00A9046E /* Price+CoreDataClass.swift */,
+				7AC45A17214C230B00A9046E /* Price+CoreDataProperties.swift */,
+				7AC45A20214C230B00A9046E /* Parameter+CoreDataClass.swift */,
+				7AC45A21214C230B00A9046E /* Parameter+CoreDataProperties.swift */,
+				7AC45A1A214C230B00A9046E /* ProductParameter+CoreDataClass.swift */,
+				7AC45A1B214C230B00A9046E /* ProductParameter+CoreDataProperties.swift */,
+				7AC45A1C214C230B00A9046E /* Hit+CoreDataClass.swift */,
+				7AC45A1D214C230B00A9046E /* Hit+CoreDataProperties.swift */,
+				7AC45A14214C230B00A9046E /* ProductPicture+CoreDataClass.swift */,
+				7AC45A15214C230B00A9046E /* ProductPicture+CoreDataProperties.swift */,
 				7AC45A34214C239700A9046E /* CoreDataStack.swift */,
 				7A720C94214E29370031EA86 /* ReturnResult.swift */,
 			);
@@ -261,7 +276,9 @@
 			files = (
 				7A720C95214E29370031EA86 /* ReturnResult.swift in Sources */,
 				7AC45A35214C239700A9046E /* CoreDataStack.swift in Sources */,
+				7A11F3CC214ED4B6005184F7 /* ProductPictureJSON.swift in Sources */,
 				7A131F6E214C029A0082FAAB /* MoyaPryazha.xcdatamodeld in Sources */,
+				7A11F3C8214ED45D005184F7 /* ParameterJSON.swift in Sources */,
 				7A720C93214D97240031EA86 /* LoadViewController.swift in Sources */,
 				7AE699EA21457A03000DC949 /* LastModified.swift in Sources */,
 				7A18B6BB2145015A00ED55A7 /* DataProvider.swift in Sources */,
@@ -269,11 +286,14 @@
 				7A0629E8214C51E6009EA4B3 /* GlobalConstants.swift in Sources */,
 				7A18B6B72144FCEF00ED55A7 /* HitTableViewCell.swift in Sources */,
 				7A131F68214BFFDF0082FAAB /* CategoryJSON.swift in Sources */,
-				7A131F6A214C01DE0082FAAB /* ProductParamsJSON.swift in Sources */,
+				7A131F6A214C01DE0082FAAB /* ProductParameterJSON.swift in Sources */,
 				7A18B6B92144FF0C00ED55A7 /* ProductJSON.swift in Sources */,
 				7AAC05B42145231F004AB93D /* HitProducts.swift in Sources */,
 				7ADFD92F21370C6C00E19918 /* AppDelegate.swift in Sources */,
 				7A1B03A02143D4DC009ED34C /* MainViewController.swift in Sources */,
+				7A11F3C6214ED380005184F7 /* CurrencyJSON.swift in Sources */,
+				7A11F3CA214ED4A0005184F7 /* HitJSON.swift in Sources */,
+				7A11F3C4214ED08A005184F7 /* PriceJSON.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -1,5 +1,5 @@
 //
-//  Catalog.swift
+//  ProductJSON.swift
 //  MoyaPryazha
 //
 //  Created by Dennis Zubkoff on 09/09/2018.
@@ -11,9 +11,7 @@ import Foundation
 struct ProductJSON: Codable {
     let id: String
     let name: String
-    let price: String?
     let thumbnail: String
-    let picture: String
     let description: String
     let ordered: String
     let categoryId: String
@@ -21,11 +19,10 @@ struct ProductJSON: Codable {
     enum CodingKeys: String, CodingKey {
         case id
         case name
-        case price
         case thumbnail
-        case picture
         case description
         case ordered
         case categoryId
     }
+    
 }
