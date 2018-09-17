@@ -13,6 +13,8 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
     let dataProvider = DataProvider()
     var hitProducts: [Product] = []
     let globalConstants = GlobalConstants()
+    let rootViewController = AppDelegate.shared.rootViewController
+    
     
     @IBOutlet weak var hitTableView: UITableView!
     @IBOutlet weak var headerLabel: UILabel!
@@ -53,25 +55,26 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
     
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return hitProducts.count
+        return rootViewController.hits.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = hitTableView.dequeueReusableCell(withIdentifier: "HitCell", for: indexPath) as! HitTableViewCell
         cell.siteButton.layer.cornerRadius = 15
-//        cell.nameLabel.text = hitProducts[indexPath.row].name
-//        if let price = String(hitProducts[indexPath.row].price) {
-//            cell.priceLabel.text = price + " руб."
-//        }
-//        if let url = hitProducts[indexPath.row].thumbnail {
-//            if let imageURL = URL(string: "http://moya-pryazha.ru/" + url) {
-//                self.dataProvider.downloadImage(url: imageURL) { image in
-//                    guard let image = image else { return }
-//                    cell.previewImage.image = image
-//                }
-//
-//            }
-//        }
+        let hit = rootViewController.hits[indexPath.row]
+        cell.nameLabel.text = hit.product?.name
+        if let price = rootViewController.prices.filter({$0.product == hit.product && $0.priceType?.id ?? 1 == 1}).first?.price {
+            cell.priceLabel.text = "\(price) руб."
+        }
+        if let url = hit.product?.thumbnailPath {
+            if let imageURL = URL(string: "http://moya-pryazha.ru/\(url)") {
+                self.dataProvider.downloadImage(url: imageURL) { image in
+                    guard let image = image else { return }
+                    cell.previewImage.image = image
+                }
+
+            }
+        }
         return cell
     }
     

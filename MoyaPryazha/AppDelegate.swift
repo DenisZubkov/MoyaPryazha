@@ -43,3 +43,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 }
 
+extension AppDelegate {
+    static var shared: AppDelegate {
+        return UIApplication.shared.delegate as! AppDelegate
+    }
+    var rootViewController: LoadViewController {
+        return window!.rootViewController as! LoadViewController
+    }
+}
+

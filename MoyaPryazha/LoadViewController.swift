@@ -67,10 +67,14 @@ class LoadViewController: UIViewController {
         self.products = products
         print(self.products.count)
         
+        // Currencies array
+        
         loadProgressView.progress = 0.375
         guard let currencies = getCurrencies() else { return true }
         self.currencies = currencies
         print(self.currencies.count)
+        
+        // Prices array
         
         loadProgressView.progress = 0.5
         guard let priceTypes = getPriceTypes() else { return true }
@@ -80,22 +84,30 @@ class LoadViewController: UIViewController {
         self.prices = prices
         print(self.prices.count)
         
+        
+        // Parameters array
+        
+        
         loadProgressView.progress = 0.625
         guard let parameters = getParameters() else { return true }
         self.parameters = parameters
         print(self.parameters.count)
+        
+        // Product parameters array
         
         loadProgressView.progress = 0.750
         guard let productParameters = getProductParameters() else { return true }
         self.productParameters = productParameters
         print(self.productParameters.count)
 
+        // Hits array
         
         loadProgressView.progress = 0.875
         guard let hits = getHits() else { return true }
         self.hits = hits
         print(self.hits.count)
 
+        // Product pictures array
         
         loadProgressView.progress = 1
         guard let productPictures = getProductPictures() else { return true }
