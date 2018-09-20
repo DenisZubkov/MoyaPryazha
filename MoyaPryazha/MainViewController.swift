@@ -11,7 +11,6 @@ import UIKit
 class MainViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
     let dataProvider = DataProvider()
-    var hitProducts: [Product] = []
     let globalConstants = GlobalConstants()
     let rootViewController = AppDelegate.shared.rootViewController
     
@@ -32,23 +31,6 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
         tabBarController?.tabBar.tintColor = .white
         tabBarController?.tabBar.unselectedItemTintColor = UIColor.black
         
-        
-            
-       
-//        let url = globalConstants.moyaPryazhaSite + globalConstants.moyaPryazhaServicesPath + "srvHits.php"
-//        if let hitProductsURL = URL(string: url) {
-//            self.dataProvider.downloadHits(url: hitProductsURL) { hitProducts in
-//                guard let hitProducts = hitProducts else { return }
-//                self.hitProducts = hitProducts.products
-//                DispatchQueue.main.async {
-//                    self.hitTableView.reloadData()
-//                }
-//            }
-//
-//        }
-
-//        UITabBarItem.appearance().setTitleTextAttributes([NSAttributedString.Key.foregroundColor: UIColor.black], for: .normal)
-        // Do any additional setup after loading the view.
     }
     
     
@@ -81,14 +63,6 @@ class MainViewController: UIViewController, UITableViewDelegate, UITableViewData
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
     }
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
+    
 
 }
