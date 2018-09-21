@@ -20,9 +20,9 @@ class CategoryViewController: UIViewController, UITableViewDataSource, UITableVi
     let rootViewController = AppDelegate.shared.rootViewController
     var categoryLevel: Int32 = 0
     var viewCategories: [Category] = []
+    var willGoProducts = false
     
     @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var categoryNameLabel: UILabel!
     @IBOutlet weak var backBarButtonItem: UIBarButtonItem!
     
     
@@ -33,14 +33,15 @@ class CategoryViewController: UIViewController, UITableViewDataSource, UITableVi
         super.viewDidLoad()
         navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
         navigationController?.navigationBar.shadowImage = UIImage()
+    
         //tabBarController?.tabBar.backgroundImage = UIImage()
         tabBarController?.tabBar.tintColor = .white
         tabBarController?.tabBar.unselectedItemTintColor = UIColor.black
+        title = "Каталог"
         backBarButtonItem.isEnabled = false
         backBarButtonItem.image = nil
         viewCategories = rootViewController.categories.filter({$0.parentId == categoryLevel})
         viewCategories = viewCategories.sorted(by: {$0.order < $1.order})
-        categoryNameLabel.text = ""
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
 
@@ -75,7 +76,7 @@ class CategoryViewController: UIViewController, UITableViewDataSource, UITableVi
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-        let currentViewCateoguries = viewCategories
+        let currentViewCategories = viewCategories
         categoryLevel =  viewCategories[indexPath.row].id
         backBarButtonItem.isEnabled = categoryLevel != 0
         backBarButtonItem.image = categoryLevel != 0 ? UIImage(named: "left") : nil
@@ -83,29 +84,33 @@ class CategoryViewController: UIViewController, UITableViewDataSource, UITableVi
         viewCategories = rootViewController.categories.filter({$0.parentId == categoryLevel})
         viewCategories = viewCategories.sorted(by: {$0.order < $1.order})
         if viewCategories.count != 0 {
-            categoryNameLabel.text = currentViewCateoguries[indexPath.row].name
+            title = currentViewCategories[indexPath.row].name
             tableView.reloadData()
+            willGoProducts = false
         } else {
-            if let currentCategory = currentViewCateoguries.first?.parentId {
-                viewCategories = currentViewCateoguries
+            if let currentCategory = currentViewCategories.first?.parentId {
+                viewCategories = currentViewCategories
                 categoryLevel =  currentCategory
             }
+            willGoProducts = true
+            performSegue(withIdentifier: "CategoryProductSegue", sender: nil)
+            willGoProducts = false
         }
     }
     
     
     
     @IBAction func pressedBackBarButtonItem(_ sender: UIBarButtonItem) {
-        
+        willGoProducts = false
         let parentCategory = rootViewController.categories.filter({$0.id == categoryLevel})
         if let backLevel = parentCategory.first?.parentId {
             viewCategories = rootViewController.categories.filter({$0.parentId == backLevel})
             viewCategories = viewCategories.sorted(by: {$0.order < $1.order})
             categoryLevel = backLevel
             if backLevel != 0 {
-                categoryNameLabel.text = rootViewController.categories.filter({$0.id == backLevel}).first?.name
+                title = rootViewController.categories.filter({$0.id == backLevel}).first?.name
             } else {
-                categoryNameLabel.text = ""
+                title = "Каталог"
             }
             backBarButtonItem.isEnabled = categoryLevel != 0
             backBarButtonItem.image = categoryLevel != 0 ? UIImage(named: "left") : nil
@@ -115,56 +120,26 @@ class CategoryViewController: UIViewController, UITableViewDataSource, UITableVi
         
     }
     
+    override func shouldPerformSegue(withIdentifier identifier: String, sender: Any?) -> Bool {
+        if identifier == "CategoryProductSegue" {
+            if willGoProducts {
+                return true
+            }
+        }
+        return false
+            
+    }
     
-    // MARK: - Table view data source
-   
-
-    
-
-    /*
-    // Override to support conditional editing of the table view.
-    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the specified item to be editable.
-        return true
-    }
-    */
-
-    /*
-    // Override to support editing the table view.
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete {
-            // Delete the row from the data source
-            tableView.deleteRows(at: [indexPath], with: .fade)
-        } else if editingStyle == .insert {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-        }    
-    }
-    */
-
-    /*
-    // Override to support rearranging the table view.
-    override func tableView(_ tableView: UITableView, moveRowAt fromIndexPath: IndexPath, to: IndexPath) {
-
-    }
-    */
-
-    /*
-    // Override to support conditional rearranging of the table view.
-    override func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
-        // Return false if you do not want the item to be re-orderable.
-        return true
-    }
-    */
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+        if segue.identifier == "CategoryProductSegue" {
+            if let indexPath = tableView.indexPathForSelectedRow {
+                let currentCategory = viewCategories[indexPath.row]
+                let dvc = segue.destination as! ProductListViewController
+                dvc.currentCategory = currentCategory
+            }
+        }
     }
-    */
+    
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
     }

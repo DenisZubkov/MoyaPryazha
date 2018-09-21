@@ -17,7 +17,7 @@ class LoadViewController: UIViewController {
     let globalConstants = GlobalConstants()
     let coreDataStack = CoreDataStack()
     var context: NSManagedObjectContext!
-    var error = false
+    var error = true
     var categories: [Category] = []
     var products: [Product] = []
     var currencies: [Currency] = []
@@ -30,7 +30,8 @@ class LoadViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        error = loadData()
+       
+        //error = loadData()
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -143,9 +144,13 @@ class LoadViewController: UIViewController {
             }
             if let message = message,
                 let title = title {
-                DispatchQueue.main.async {
-                    self.showMessage(title: title, message: message)
-                }
+                let alertData = UIAlertController(title: title, message: message, preferredStyle: .alert)
+                let cancelAction = UIAlertAction(title: "Ok", style: .default, handler: nil)
+                alertData.addAction(cancelAction)
+                self.present(alertData, animated: true, completion: nil)
+//                DispatchQueue.main.async {
+//                    self.showMessage(title: title, message: message)
+//                }
                 isLoad = true
                 return
             }
@@ -165,7 +170,7 @@ class LoadViewController: UIViewController {
         let alertData = UIAlertController(title: title, message: message, preferredStyle: .alert)
         let cancelAction = UIAlertAction(title: "Ok", style: .default, handler: nil)
         alertData.addAction(cancelAction)
-        self.present(alertData, animated: true, completion: nil)
+        present(alertData, animated: true, completion: nil)
     }
     
     func getModifiedDate() -> Date? {
@@ -209,17 +214,23 @@ class LoadViewController: UIViewController {
                     if categories.count != 0 {
                         let deletedCategories = deleteCategoriesFromCoreData(context: self.context)
                         if deletedCategories.count == -1 {
-                            showMessage(title: "Ошибка", message: deletedCategories.error)
+                            DispatchQueue.main.async {
+                                self.showMessage(title: "Ошибка", message: deletedCategories.error)
+                            }
                             return nil
                         }
                         let addedCategories = addCategoriesToCoreData(categories: categories, context: self.context)
                         if addedCategories.count == -1 {
-                            showMessage(title: "Ошибка", message: addedCategories.error)
+                            DispatchQueue.main.async {
+                                self.showMessage(title: "Ошибка", message: addedCategories.error)
+                            }
                             return nil
                         }
                     }
                 } catch let jsonError {
-                    showMessage(title: "Ошибка", message: jsonError.localizedDescription)
+                    DispatchQueue.main.async {
+                        self.showMessage(title: "Ошибка", message: jsonError.localizedDescription)
+                    }
                     return nil
                 }
             }
@@ -229,7 +240,9 @@ class LoadViewController: UIViewController {
             let results = try context.fetch(fetchRequest)
             returnCategories = results
         } catch let error as NSError {
-            showMessage(title: "Ошибка", message: error.localizedDescription)
+            DispatchQueue.main.async {
+                self.showMessage(title: "Ошибка", message: error.localizedDescription)
+            }
         }
         return returnCategories
     }
@@ -264,11 +277,14 @@ class LoadViewController: UIViewController {
             categoryCurrent = Category(context: self.context)
             // присваиваем переданные свойства
             categoryCurrent.id = Int32(category.id) ?? 0
-            categoryCurrent.name = category.name
+            var categoryName: String? = category.name
+            categoryName = categoryName?.components(separatedBy: "ВЫБЕРИТЕ ПОДКАТЕГОРИЮ").first
+            categoryCurrent.name = categoryName ?? category.name
             categoryCurrent.picturePath = category.picture
             categoryCurrent.thumbnailPath = category.thumbnail
             categoryCurrent.parentId = Int32(category.parentId) ?? 0
             categoryCurrent.order = Int32(category.order) ?? 0
+            categoryCurrent.slug = category.slug
             returnResult.count += returnResult.count
             
         }
@@ -298,17 +314,23 @@ class LoadViewController: UIViewController {
                     if products.count != 0 {
                         let deletedProducts = deleteProductsFromCoreData(context: self.context)
                         if deletedProducts.count == -1 {
-                            showMessage(title: "Ошибка", message: deletedProducts.error)
+                            DispatchQueue.main.async {
+                                self.showMessage(title: "Ошибка", message: deletedProducts.error)
+                            }
                             return nil
                         }
                         let addedProducts = addProductsToCoreData(products: products, context: self.context)
                         if addedProducts.count == -1 {
-                            showMessage(title: "Ошибка", message: addedProducts.error)
+                            DispatchQueue.main.async {
+                                self.showMessage(title: "Ошибка", message: addedProducts.error)
+                            }
                             return nil
                         }
                     }
                 } catch let jsonError {
-                    showMessage(title: "Ошибка", message: jsonError.localizedDescription)
+                    DispatchQueue.main.async {
+                        self.showMessage(title: "Ошибка", message: jsonError.localizedDescription)
+                    }
                     print(jsonError)
                     return nil
                 }
@@ -319,7 +341,9 @@ class LoadViewController: UIViewController {
             let results = try context.fetch(fetchRequest)
             returnProducts = results
         } catch let error as NSError {
-            showMessage(title: "Ошибка", message: error.localizedDescription)
+            DispatchQueue.main.async {
+                self.showMessage(title: "Ошибка", message: error.localizedDescription)
+            }
         }
         return returnProducts
     }
@@ -356,6 +380,7 @@ class LoadViewController: UIViewController {
             productCurrent = Product(context: self.context)
             // присваиваем переданные свойства
             productCurrent.id = Int32(product.id) ?? 0
+            productCurrent.slug = product.slug
             productCurrent.name = product.name
             productCurrent.thumbnailPath = product.thumbnail
             productCurrent.order = Int32(product.ordered) ?? 0
@@ -392,17 +417,23 @@ class LoadViewController: UIViewController {
                     if currencies.count != 0 {
                         let deletedCurrencies = deleteCurrenciesFromCoreData(context: self.context)
                         if deletedCurrencies.count == -1 {
-                            showMessage(title: "Ошибка", message: deletedCurrencies.error)
+                            DispatchQueue.main.async {
+                                self.showMessage(title: "Ошибка", message: deletedCurrencies.error)
+                            }
                             return nil
                         }
                         let addedCurrencies = addCurrenciesToCoreData(currencies: currencies, context: self.context)
                         if addedCurrencies.count == -1 {
-                            showMessage(title: "Ошибка", message: addedCurrencies.error)
+                            DispatchQueue.main.async {
+                                self.showMessage(title: "Ошибка", message: addedCurrencies.error)
+                            }
                             return nil
                         }
                     }
                 } catch let jsonError {
-                    showMessage(title: "Ошибка", message: jsonError.localizedDescription)
+                    DispatchQueue.main.async {
+                        self.showMessage(title: "Ошибка", message: jsonError.localizedDescription)
+                    }
                     print(jsonError)
                     return nil
                 }
@@ -413,7 +444,9 @@ class LoadViewController: UIViewController {
             let results = try context.fetch(fetchRequest)
             returnCurrencies = results
         } catch let error as NSError {
-            showMessage(title: "Ошибка", message: error.localizedDescription)
+            DispatchQueue.main.async {
+                self.showMessage(title: "Ошибка", message: error.localizedDescription)
+            }
         }
         return returnCurrencies
     }
@@ -476,7 +509,9 @@ class LoadViewController: UIViewController {
             let results = try context.fetch(fetchRequest)
             returnPriceTypes = results
         } catch let error as NSError {
-            showMessage(title: "Ошибка", message: error.localizedDescription)
+            DispatchQueue.main.async {
+                self.showMessage(title: "Ошибка", message: error.localizedDescription)
+            }
         }
         if returnPriceTypes.count == 0 {
             returnPriceTypes.append(PriceType(context: self.context))
@@ -509,17 +544,23 @@ class LoadViewController: UIViewController {
                     if prices.count != 0 {
                         let deletedPrices = deletePricesFromCoreData(context: self.context)
                         if deletedPrices.count == -1 {
-                            showMessage(title: "Ошибка", message: deletedPrices.error)
+                            DispatchQueue.main.async {
+                                self.showMessage(title: "Ошибка", message: deletedPrices.error)
+                            }
                             return nil
                         }
                         let addedPrices = addPricesToCoreData(prices: prices, context: self.context)
                         if addedPrices.count == -1 {
-                            showMessage(title: "Ошибка", message: addedPrices.error)
+                            DispatchQueue.main.async {
+                                self.showMessage(title: "Ошибка", message: addedPrices.error)
+                            }
                             return nil
                         }
                     }
                 } catch let jsonError {
-                    showMessage(title: "Ошибка", message: jsonError.localizedDescription)
+                    DispatchQueue.main.async {
+                        self.showMessage(title: "Ошибка", message: jsonError.localizedDescription)
+                    }
                     print(jsonError)
                     return nil
                 }
@@ -530,7 +571,9 @@ class LoadViewController: UIViewController {
             let results = try context.fetch(fetchRequest)
             returnPrices = results
         } catch let error as NSError {
-            showMessage(title: "Ошибка", message: error.localizedDescription)
+            DispatchQueue.main.async {
+                self.showMessage(title: "Ошибка", message: error.localizedDescription)
+            }
         }
         return returnPrices
     }
@@ -601,17 +644,23 @@ class LoadViewController: UIViewController {
                     if parameters.count != 0 {
                         let deletedParameters = deleteParametersFromCoreData(context: self.context)
                         if deletedParameters.count == -1 {
-                            showMessage(title: "Ошибка", message: deletedParameters.error)
+                            DispatchQueue.main.async {
+                                self.showMessage(title: "Ошибка", message: deletedParameters.error)
+                            }
                             return nil
                         }
                         let addedParameters = addParametersToCoreData(parameters: parameters, context: self.context)
                         if addedParameters.count == -1 {
-                            showMessage(title: "Ошибка", message: addedParameters.error)
+                            DispatchQueue.main.async {
+                                self.showMessage(title: "Ошибка", message: addedParameters.error)
+                            }
                             return nil
                         }
                     }
                 } catch let jsonError {
-                    showMessage(title: "Ошибка", message: jsonError.localizedDescription)
+                    DispatchQueue.main.async {
+                        self.showMessage(title: "Ошибка", message: jsonError.localizedDescription)
+                    }
                     print(jsonError)
                     return nil
                 }
@@ -622,7 +671,9 @@ class LoadViewController: UIViewController {
             let results = try context.fetch(fetchRequest)
             returnParameters = results
         } catch let error as NSError {
-            showMessage(title: "Ошибка", message: error.localizedDescription)
+            DispatchQueue.main.async {
+                self.showMessage(title: "Ошибка", message: error.localizedDescription)
+            }
         }
         return returnParameters
     }
@@ -692,17 +743,23 @@ class LoadViewController: UIViewController {
                     if productParameters.count != 0 {
                         let deletedProductParameters = deleteProductParametersFromCoreData(context: self.context)
                         if deletedProductParameters.count == -1 {
-                            showMessage(title: "Ошибка", message: deletedProductParameters.error)
+                            DispatchQueue.main.async {
+                                self.showMessage(title: "Ошибка", message: deletedProductParameters.error)
+                            }
                             return nil
                         }
                         let addedProductParameters = addProductParametersToCoreData(productParameters: productParameters, context: self.context)
                         if addedProductParameters.count == -1 {
-                            showMessage(title: "Ошибка", message: addedProductParameters.error)
+                            DispatchQueue.main.async {
+                                self.showMessage(title: "Ошибка", message: addedProductParameters.error)
+                            }
                             return nil
                         }
                     }
                 } catch let jsonError {
-                    showMessage(title: "Ошибка", message: jsonError.localizedDescription)
+                    DispatchQueue.main.async {
+                        self.showMessage(title: "Ошибка", message: jsonError.localizedDescription)
+                    }
                     print(jsonError)
                     return nil
                 }
@@ -713,7 +770,9 @@ class LoadViewController: UIViewController {
             let results = try context.fetch(fetchRequest)
             returnProductParameters = results
         } catch let error as NSError {
-            showMessage(title: "Ошибка", message: error.localizedDescription)
+            DispatchQueue.main.async {
+                self.showMessage(title: "Ошибка", message: error.localizedDescription)
+            }
         }
         return returnProductParameters
     }
@@ -786,17 +845,23 @@ class LoadViewController: UIViewController {
                     if hits.count != 0 {
                         let deletedHits = deleteHitsFromCoreData(context: self.context)
                         if deletedHits.count == -1 {
-                            showMessage(title: "Ошибка", message: deletedHits.error)
+                            DispatchQueue.main.async {
+                                self.showMessage(title: "Ошибка", message: deletedHits.error)
+                            }
                             return nil
                         }
                         let addedHits = addHitsToCoreData(hits: hits, context: self.context)
                         if addedHits.count == -1 {
-                            showMessage(title: "Ошибка", message: addedHits.error)
+                            DispatchQueue.main.async {
+                                self.showMessage(title: "Ошибка", message: addedHits.error)
+                            }
                             return nil
                         }
                     }
                 } catch let jsonError {
-                    showMessage(title: "Ошибка", message: jsonError.localizedDescription)
+                    DispatchQueue.main.async {
+                        self.showMessage(title: "Ошибка", message: jsonError.localizedDescription)
+                    }
                     print(jsonError)
                     return nil
                 }
@@ -807,7 +872,9 @@ class LoadViewController: UIViewController {
             let results = try context.fetch(fetchRequest)
             returnHits = results
         } catch let error as NSError {
-            showMessage(title: "Ошибка", message: error.localizedDescription)
+            DispatchQueue.main.async {
+                self.showMessage(title: "Ошибка", message: error.localizedDescription)
+            }
         }
         return returnHits
     }
@@ -877,17 +944,23 @@ class LoadViewController: UIViewController {
                     if productPictures.count != 0 {
                         let deletedProductPictures = deleteProductPicturesFromCoreData(context: self.context)
                         if deletedProductPictures.count == -1 {
-                            showMessage(title: "Ошибка", message: deletedProductPictures.error)
+                            DispatchQueue.main.async {
+                                self.showMessage(title: "Ошибка", message: deletedProductPictures.error)
+                            }
                             return nil
                         }
                         let addedProductPictures = addProductPicturesToCoreData(productPictures: productPictures, context: self.context)
                         if addedProductPictures.count == -1 {
-                            showMessage(title: "Ошибка", message: addedProductPictures.error)
+                            DispatchQueue.main.async {
+                                self.showMessage(title: "Ошибка", message: addedProductPictures.error)
+                            }
                             return nil
                         }
                     }
                 } catch let jsonError {
-                    showMessage(title: "Ошибка", message: jsonError.localizedDescription)
+                    DispatchQueue.main.async {
+                        self.showMessage(title: "Ошибка", message: jsonError.localizedDescription)
+                    }
                     print(jsonError)
                     return nil
                 }
@@ -898,7 +971,9 @@ class LoadViewController: UIViewController {
             let results = try context.fetch(fetchRequest)
             returnProductPictures = results
         } catch let error as NSError {
-            showMessage(title: "Ошибка", message: error.localizedDescription)
+            DispatchQueue.main.async {
+                self.showMessage(title: "Ошибка", message: error.localizedDescription)
+            }
         }
         return returnProductPictures
     }

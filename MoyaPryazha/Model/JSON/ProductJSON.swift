@@ -10,6 +10,7 @@ import Foundation
 
 struct ProductJSON: Codable {
     let id: String
+    let slug: String
     let name: String
     let thumbnail: String
     let description: String
@@ -18,6 +19,7 @@ struct ProductJSON: Codable {
     
     enum CodingKeys: String, CodingKey {
         case id
+        case slug
         case name
         case thumbnail
         case description

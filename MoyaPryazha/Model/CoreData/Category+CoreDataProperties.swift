@@ -2,7 +2,7 @@
 //  Category+CoreDataProperties.swift
 //  MoyaPryazha
 //
-//  Created by Dennis Zubkoff on 16/09/2018.
+//  Created by Denis Zubkov on 21/09/2018.
 //  Copyright © 2018 Dennis Zubkoff. All rights reserved.
 //
 //
@@ -23,9 +23,10 @@ extension Category {
     @NSManaged public var order: Int32
     @NSManaged public var parentId: Int32
     @NSManaged public var picture: NSData?
-    @NSManaged public var thumbnail: NSData?
     @NSManaged public var picturePath: String?
+    @NSManaged public var thumbnail: NSData?
     @NSManaged public var thumbnailPath: String?
+    @NSManaged public var slug: String?
     @NSManaged public var products: NSSet?
 
 }
