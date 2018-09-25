@@ -59,21 +59,19 @@ class LoadViewController: UIViewController {
         loadProgressView.progress = 0.125
         guard let categories = getCategories() else { return true }
         self.categories = categories
-        print(self.categories.count)
         
         // Products array
         
         loadProgressView.progress = 0.25
         guard let products = getProducts() else { return true }
         self.products = products
-        print(self.products.count)
         
         // Currencies array
         
         loadProgressView.progress = 0.375
         guard let currencies = getCurrencies() else { return true }
         self.currencies = currencies
-        print(self.currencies.count)
+
         
         // Prices array
         
@@ -83,7 +81,6 @@ class LoadViewController: UIViewController {
         print(self.priceTypes.count)
         guard let prices = getPrices() else { return true }
         self.prices = prices
-        print(self.prices.count)
         
         
         // Parameters array
@@ -92,28 +89,24 @@ class LoadViewController: UIViewController {
         loadProgressView.progress = 0.625
         guard let parameters = getParameters() else { return true }
         self.parameters = parameters
-        print(self.parameters.count)
         
         // Product parameters array
         
         loadProgressView.progress = 0.750
         guard let productParameters = getProductParameters() else { return true }
         self.productParameters = productParameters
-        print(self.productParameters.count)
-
+ 
         // Hits array
         
         loadProgressView.progress = 0.875
         guard let hits = getHits() else { return true }
         self.hits = hits
-        print(self.hits.count)
 
         // Product pictures array
         
         loadProgressView.progress = 1
         guard let productPictures = getProductPictures() else { return true }
         self.productPictures = productPictures
-        print(self.productPictures.count)
         return false
         
     }
@@ -1014,7 +1007,6 @@ class LoadViewController: UIViewController {
             productPictureCurrent.path = productPicture.path
             let productId = Int32(productPicture.productId) ?? 0
             productPictureCurrent.product = self.products.filter({$0.id == productId}).first
-            
             returnResult.count += returnResult.count
 
         }

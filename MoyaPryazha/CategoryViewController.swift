@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CoreData
 
 class CategoryViewController: UIViewController, UITableViewDataSource, UITableViewDelegate  {
     
@@ -21,6 +22,9 @@ class CategoryViewController: UIViewController, UITableViewDataSource, UITableVi
     var categoryLevel: Int32 = 0
     var viewCategories: [Category] = []
     var willGoProducts = false
+    let coreDataStack = CoreDataStack()
+    var context: NSManagedObjectContext!
+    let titleLabel = UILabel()
     
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var backBarButtonItem: UIBarButtonItem!
@@ -31,13 +35,19 @@ class CategoryViewController: UIViewController, UITableViewDataSource, UITableVi
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        context = coreDataStack.persistentContainer.viewContext
         navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
         navigationController?.navigationBar.shadowImage = UIImage()
-    
-        //tabBarController?.tabBar.backgroundImage = UIImage()
         tabBarController?.tabBar.tintColor = .white
         tabBarController?.tabBar.unselectedItemTintColor = UIColor.black
-        title = "Каталог"
+        titleLabel.font = UIFont(name: "AaarghCyrillicBold", size: 20)// Нужный шрифт
+        titleLabel.text = "Каталог товаров магазина"
+        titleLabel.textColor = UIColor.white
+        titleLabel.adjustsFontSizeToFitWidth = true
+        titleLabel.textAlignment = .center
+        titleLabel.minimumScaleFactor = 0.75 // Минимальный относительный размер шрифта
+        navigationItem.titleView = titleLabel
+        titleLabel.text = "Каталог"
         backBarButtonItem.isEnabled = false
         backBarButtonItem.image = nil
         viewCategories = rootViewController.categories.filter({$0.parentId == categoryLevel})
@@ -57,16 +67,29 @@ class CategoryViewController: UIViewController, UITableViewDataSource, UITableVi
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath) as! CategoryTableViewCell
-        
-        cell.nameLabel.text = viewCategories[indexPath.row].name
-        if let url = viewCategories[indexPath.row].thumbnailPath {
-            if let imageURL = URL(string: "http://moya-pryazha.ru/\(url)") {
-                self.dataProvider.downloadImage(url: imageURL) { image in
-                    guard let image = image else { return }
-                    cell.thumbnailImage.image = image
-                }
+        let category = viewCategories[indexPath.row]
+        cell.nameLabel.text = category.name
+        if category.thumbnail == nil {
+            if let url = category.thumbnailPath {
                 
+                if let imageURL = URL(string: "\(globalConstants.moyaPryazhaSite)\(url.replacingOccurrences(of: " ", with: "%20"))") {
+                    self.dataProvider.downloadImage(url: imageURL) { image in
+                        guard let image = image else { return }
+                        cell.thumbnailImage.image = image
+                        category.thumbnail = image.pngData()
+                        do {
+                            try self.context.save()
+                        } catch let error as NSError {
+                            print(error)
+                        }
+                    }
+                    
+                } else {
+                    cell.thumbnailImage.image = UIImage(named: "NoPhoto")
+                }
             }
+        } else {
+            cell.thumbnailImage.image = UIImage(data: viewCategories[indexPath.row].thumbnail!)
         }
         
         // Configure the cell...
@@ -80,11 +103,12 @@ class CategoryViewController: UIViewController, UITableViewDataSource, UITableVi
         categoryLevel =  viewCategories[indexPath.row].id
         backBarButtonItem.isEnabled = categoryLevel != 0
         backBarButtonItem.image = categoryLevel != 0 ? UIImage(named: "left") : nil
-
+        viewCategories.removeAll()
         viewCategories = rootViewController.categories.filter({$0.parentId == categoryLevel})
         viewCategories = viewCategories.sorted(by: {$0.order < $1.order})
         if viewCategories.count != 0 {
-            title = currentViewCategories[indexPath.row].name
+            let title = currentViewCategories[indexPath.row].name
+            titleLabel.text = title
             tableView.reloadData()
             willGoProducts = false
         } else {
@@ -108,9 +132,10 @@ class CategoryViewController: UIViewController, UITableViewDataSource, UITableVi
             viewCategories = viewCategories.sorted(by: {$0.order < $1.order})
             categoryLevel = backLevel
             if backLevel != 0 {
-                title = rootViewController.categories.filter({$0.id == backLevel}).first?.name
+                let title = rootViewController.categories.filter({$0.id == backLevel}).first?.name
+                titleLabel.text = title
             } else {
-                title = "Каталог"
+                titleLabel.text = "Каталог"
             }
             backBarButtonItem.isEnabled = categoryLevel != 0
             backBarButtonItem.image = categoryLevel != 0 ? UIImage(named: "left") : nil

@@ -59,4 +59,6 @@ class ProductListTableViewCell: UITableViewCell {
         return path
     }
     
+    
+    
 }

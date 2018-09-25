@@ -11,7 +11,8 @@ import Foundation
 
 struct CategoryJSON: Codable {
     let id, slug, parentId, name, descriprion: String
-    let picture, thumbnail, order: String
+    let picture, thumbnail: String?
+    let order: String
     
     enum CodingKeys: String, CodingKey {
         case id,slug

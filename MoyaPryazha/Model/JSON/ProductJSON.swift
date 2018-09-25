@@ -12,7 +12,7 @@ struct ProductJSON: Codable {
     let id: String
     let slug: String
     let name: String
-    let thumbnail: String
+    let thumbnail: String?
     let description: String
     let ordered: String
     let categoryId: String

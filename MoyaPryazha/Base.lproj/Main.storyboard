@@ -29,11 +29,11 @@
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="8sU-qz-ffu">
                                 <rect key="frame" x="0.0" y="64" width="375" height="554"/>
                                 <subviews>
-                                    <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" allowsSelection="NO" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="FhD-i9-JIB">
+                                    <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="FhD-i9-JIB">
                                         <rect key="frame" x="0.0" y="0.0" width="375" height="554"/>
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <prototypes>
-                                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="none" indentationWidth="10" reuseIdentifier="HitCell" rowHeight="129" id="bbO-Ad-Eu6" customClass="ProductListTableViewCell" customModule="MoyaPryazha" customModuleProvider="target">
+                                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="none" indentationWidth="10" reuseIdentifier="ProductCell" rowHeight="129" id="bbO-Ad-Eu6" userLabel="Product Cell" customClass="ProductListTableViewCell" customModule="MoyaPryazha" customModuleProvider="target">
                                                 <rect key="frame" x="0.0" y="28" width="375" height="129"/>
                                                 <autoresizingMask key="autoresizingMask"/>
                                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="bbO-Ad-Eu6" id="99k-s1-Bzt">
@@ -99,6 +99,7 @@
                                                     <outlet property="previewImage" destination="bqv-B3-6SO" id="BIG-9l-28P"/>
                                                     <outlet property="priceLabel" destination="Qqv-tA-7l9" id="z1c-EY-QLH"/>
                                                     <outlet property="siteButton" destination="fhg-Fx-9sZ" id="was-wF-loG"/>
+                                                    <segue destination="UzF-gS-0CW" kind="show" identifier="ProductDetailSegue" id="YiH-Gj-RnR"/>
                                                 </connections>
                                             </tableViewCell>
                                         </prototypes>
@@ -123,7 +124,9 @@
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="KZC-39-Zor"/>
                     </view>
-                    <navigationItem key="navigationItem" title="Товары" id="elT-zz-wX9"/>
+                    <navigationItem key="navigationItem" title="Товары" id="elT-zz-wX9">
+                        <barButtonItem key="backBarButtonItem" title="  " id="WVT-eB-KnB"/>
+                    </navigationItem>
                     <connections>
                         <outlet property="ProductListTableView" destination="FhD-i9-JIB" id="aqi-sW-50l"/>
                     </connections>
@@ -131,6 +134,203 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="c1L-jE-QgD" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="386" y="-107"/>
+        </scene>
+        <!--Product Detail View Controller-->
+        <scene sceneID="jWg-6i-uAj">
+            <objects>
+                <viewController id="UzF-gS-0CW" customClass="ProductDetailViewController" customModule="MoyaPryazha" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="wCD-Rj-h8w">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="rQj-vq-EXE">
+                                <rect key="frame" x="0.0" y="64" width="375" height="557"/>
+                                <subviews>
+                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="mwl-yU-Gub">
+                                        <rect key="frame" x="0.0" y="0.0" width="375" height="321"/>
+                                        <subviews>
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="BTd-Dm-cfL">
+                                                <rect key="frame" x="0.0" y="0.0" width="375" height="192.5"/>
+                                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                <state key="normal" image="NoPhoto"/>
+                                                <connections>
+                                                    <segue destination="fh5-mz-Mmb" kind="show" identifier="ProductImageSegue" id="mGp-kT-3nJ"/>
+                                                </connections>
+                                            </button>
+                                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="3t8-jx-RMA">
+                                                <rect key="frame" x="0.0" y="192.5" width="375" height="128.5"/>
+                                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="10" minimumInteritemSpacing="10" id="L0A-bH-KRf">
+                                                    <size key="itemSize" width="65" height="92"/>
+                                                    <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                                                    <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                                                    <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                                </collectionViewFlowLayout>
+                                                <cells>
+                                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" misplaced="YES" reuseIdentifier="ProductCell" id="5ZY-V1-klJ" customClass="ProductImageCollectionViewCell" customModule="MoyaPryazha" customModuleProvider="target">
+                                                        <rect key="frame" x="0.0" y="18.5" width="65" height="92"/>
+                                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                        <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO">
+                                                            <rect key="frame" x="0.0" y="0.0" width="65" height="92"/>
+                                                            <autoresizingMask key="autoresizingMask"/>
+                                                            <subviews>
+                                                                <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="ZLL-vC-rha">
+                                                                    <rect key="frame" x="0.0" y="0.0" width="65" height="92"/>
+                                                                    <constraints>
+                                                                        <constraint firstAttribute="height" constant="92" id="Qj8-QW-zXD"/>
+                                                                        <constraint firstAttribute="width" constant="65" id="fVG-D7-Vdt"/>
+                                                                    </constraints>
+                                                                </imageView>
+                                                            </subviews>
+                                                        </view>
+                                                        <constraints>
+                                                            <constraint firstAttribute="bottom" secondItem="ZLL-vC-rha" secondAttribute="bottom" id="1h4-9r-h7V"/>
+                                                            <constraint firstAttribute="trailing" secondItem="ZLL-vC-rha" secondAttribute="trailing" id="AJI-3g-B8Q"/>
+                                                            <constraint firstItem="ZLL-vC-rha" firstAttribute="top" secondItem="5ZY-V1-klJ" secondAttribute="top" id="Pxm-e2-7BX"/>
+                                                            <constraint firstItem="ZLL-vC-rha" firstAttribute="leading" secondItem="5ZY-V1-klJ" secondAttribute="leading" id="iRJ-6a-r9G"/>
+                                                        </constraints>
+                                                        <connections>
+                                                            <outlet property="productPreviewImageView" destination="ZLL-vC-rha" id="mHM-5E-ae8"/>
+                                                        </connections>
+                                                    </collectionViewCell>
+                                                </cells>
+                                                <connections>
+                                                    <outlet property="dataSource" destination="UzF-gS-0CW" id="SSh-wj-thV"/>
+                                                    <outlet property="delegate" destination="UzF-gS-0CW" id="e7o-K7-zF2"/>
+                                                </connections>
+                                            </collectionView>
+                                        </subviews>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="321" id="H1d-R5-BOb"/>
+                                            <constraint firstItem="BTd-Dm-cfL" firstAttribute="height" secondItem="3t8-jx-RMA" secondAttribute="height" multiplier="1.5" id="kEd-gn-v2O"/>
+                                        </constraints>
+                                    </stackView>
+                                    <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="Dg8-fA-mPh">
+                                        <rect key="frame" x="0.0" y="321" width="375" height="236"/>
+                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <color key="separatorColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <color key="sectionIndexBackgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <prototypes>
+                                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="ProductPatameterCell" id="rEI-hE-26Y" customClass="ProductDetailTableViewCell" customModule="MoyaPryazha" customModuleProvider="target">
+                                                <rect key="frame" x="0.0" y="28" width="375" height="44"/>
+                                                <autoresizingMask key="autoresizingMask"/>
+                                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="rEI-hE-26Y" id="kly-5I-DeJ">
+                                                    <rect key="frame" x="0.0" y="0.0" width="375" height="43.5"/>
+                                                    <autoresizingMask key="autoresizingMask"/>
+                                                    <subviews>
+                                                        <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="tQd-kT-JHh">
+                                                            <rect key="frame" x="8" y="8" width="359" height="27.5"/>
+                                                            <subviews>
+                                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Key" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KV9-W0-znt">
+                                                                    <rect key="frame" x="0.0" y="0.0" width="179.5" height="27.5"/>
+                                                                    <fontDescription key="fontDescription" name="AaarghCyrillicBold" family="Aaargh" pointSize="12"/>
+                                                                    <nil key="textColor"/>
+                                                                    <nil key="highlightedColor"/>
+                                                                </label>
+                                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Value" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="OzR-i3-Dtc">
+                                                                    <rect key="frame" x="179.5" y="0.0" width="179.5" height="27.5"/>
+                                                                    <fontDescription key="fontDescription" name="AaarghCyrillicBold" family="Aaargh" pointSize="12"/>
+                                                                    <nil key="textColor"/>
+                                                                    <nil key="highlightedColor"/>
+                                                                </label>
+                                                            </subviews>
+                                                            <constraints>
+                                                                <constraint firstItem="KV9-W0-znt" firstAttribute="width" secondItem="OzR-i3-Dtc" secondAttribute="width" id="FNj-hp-f43"/>
+                                                            </constraints>
+                                                        </stackView>
+                                                    </subviews>
+                                                    <constraints>
+                                                        <constraint firstAttribute="trailingMargin" secondItem="tQd-kT-JHh" secondAttribute="trailing" id="0YC-vE-lTp"/>
+                                                        <constraint firstAttribute="bottomMargin" secondItem="tQd-kT-JHh" secondAttribute="bottom" id="2fc-sk-MSX"/>
+                                                        <constraint firstItem="tQd-kT-JHh" firstAttribute="top" secondItem="kly-5I-DeJ" secondAttribute="topMargin" id="fKd-hW-QB0"/>
+                                                        <constraint firstItem="tQd-kT-JHh" firstAttribute="leading" secondItem="kly-5I-DeJ" secondAttribute="leadingMargin" id="ms4-8a-ENo"/>
+                                                    </constraints>
+                                                </tableViewCellContentView>
+                                                <connections>
+                                                    <outlet property="keyLabel" destination="KV9-W0-znt" id="eZU-bc-hgW"/>
+                                                    <outlet property="valueLabel" destination="OzR-i3-Dtc" id="6mQ-I2-mom"/>
+                                                </connections>
+                                            </tableViewCell>
+                                        </prototypes>
+                                        <connections>
+                                            <outlet property="dataSource" destination="UzF-gS-0CW" id="hK8-Hj-EeS"/>
+                                            <outlet property="delegate" destination="UzF-gS-0CW" id="sLy-nw-Ues"/>
+                                        </connections>
+                                    </tableView>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstItem="Dg8-fA-mPh" firstAttribute="top" secondItem="mwl-yU-Gub" secondAttribute="bottom" id="AsR-2c-c0h"/>
+                                </constraints>
+                            </stackView>
+                        </subviews>
+                        <color key="backgroundColor" red="0.3411764706" green="0.64313725489999995" blue="0.015686274510000001" alpha="1" colorSpace="calibratedRGB"/>
+                        <constraints>
+                            <constraint firstItem="rQj-vq-EXE" firstAttribute="trailing" secondItem="lke-Is-UgN" secondAttribute="trailing" id="LKT-w0-vkp"/>
+                            <constraint firstAttribute="bottom" secondItem="rQj-vq-EXE" secondAttribute="bottom" constant="46" id="SKB-Fo-Xnd"/>
+                            <constraint firstItem="rQj-vq-EXE" firstAttribute="top" secondItem="lke-Is-UgN" secondAttribute="top" id="ZUM-yd-VUa"/>
+                            <constraint firstItem="rQj-vq-EXE" firstAttribute="leading" secondItem="lke-Is-UgN" secondAttribute="leading" id="ojf-JK-l2D"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="lke-Is-UgN"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="MAu-pO-oZr">
+                        <barButtonItem key="backBarButtonItem" title=" " id="tge-hk-dFd"/>
+                    </navigationItem>
+                    <connections>
+                        <outlet property="productDetailTableView" destination="Dg8-fA-mPh" id="8UV-lI-jgQ"/>
+                        <outlet property="productImageButton" destination="BTd-Dm-cfL" id="jiX-Tn-Awb"/>
+                        <outlet property="productImageCollectionView" destination="3t8-jx-RMA" id="x9r-rj-faT"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="lfP-Hh-MYz" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1108" y="-108.39580209895054"/>
+        </scene>
+        <!--Изображение-->
+        <scene sceneID="w0G-SG-a2L">
+            <objects>
+                <viewController title="Изображение" id="fh5-mz-Mmb" customClass="ProductImageViewController" customModule="MoyaPryazha" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="d59-H7-F8q">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="yJ1-vl-LnE">
+                                <rect key="frame" x="0.0" y="64" width="375" height="554"/>
+                                <subviews>
+                                    <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="sff-FO-dkO">
+                                        <rect key="frame" x="0.0" y="0.0" width="375" height="554"/>
+                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                    </imageView>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstItem="sff-FO-dkO" firstAttribute="leading" secondItem="yJ1-vl-LnE" secondAttribute="leading" id="3cr-wQ-fgA"/>
+                                    <constraint firstAttribute="bottom" secondItem="sff-FO-dkO" secondAttribute="bottom" id="6G2-7i-GXM"/>
+                                    <constraint firstItem="sff-FO-dkO" firstAttribute="centerY" secondItem="yJ1-vl-LnE" secondAttribute="centerY" id="99N-I1-eMa"/>
+                                    <constraint firstItem="sff-FO-dkO" firstAttribute="top" secondItem="yJ1-vl-LnE" secondAttribute="top" id="Jgx-Wu-f7P"/>
+                                    <constraint firstAttribute="trailing" secondItem="sff-FO-dkO" secondAttribute="trailing" id="cgl-wS-Scv"/>
+                                    <constraint firstItem="sff-FO-dkO" firstAttribute="centerX" secondItem="yJ1-vl-LnE" secondAttribute="centerX" id="ovN-RW-qIx"/>
+                                </constraints>
+                            </scrollView>
+                        </subviews>
+                        <color key="backgroundColor" red="0.3411764706" green="0.64313725489999995" blue="0.015686274510000001" alpha="1" colorSpace="calibratedRGB"/>
+                        <constraints>
+                            <constraint firstItem="yJ1-vl-LnE" firstAttribute="trailing" secondItem="6ln-cc-x9P" secondAttribute="trailing" id="8WH-k6-ATt"/>
+                            <constraint firstItem="yJ1-vl-LnE" firstAttribute="bottom" secondItem="6ln-cc-x9P" secondAttribute="bottom" id="V0r-bv-inb"/>
+                            <constraint firstItem="yJ1-vl-LnE" firstAttribute="top" secondItem="6ln-cc-x9P" secondAttribute="top" id="bka-kk-icv"/>
+                            <constraint firstItem="yJ1-vl-LnE" firstAttribute="leading" secondItem="6ln-cc-x9P" secondAttribute="leading" id="xy5-l2-4ZO"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="6ln-cc-x9P"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="14o-dq-H3T">
+                        <barButtonItem key="backBarButtonItem" title="  " id="gnB-qn-a4d"/>
+                    </navigationItem>
+                    <connections>
+                        <outlet property="productImageImageView" destination="sff-FO-dkO" id="Ks7-jf-aAe"/>
+                        <outlet property="productImageScrollView" destination="yJ1-vl-LnE" id="Ays-Vi-U1n"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="BE3-sQ-O3d" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1816.8" y="-107.49625187406298"/>
         </scene>
         <!--Tab Bar Controller-->
         <scene sceneID="yWu-Go-P7N">
@@ -188,7 +388,7 @@
             </objects>
             <point key="canvasLocation" x="-1855.2" y="-745.27736131934034"/>
         </scene>
-        <!--Каталог-->
+        <!--Category View Controller-->
         <scene sceneID="o3h-gV-gxx">
             <objects>
                 <viewController id="yzh-Lo-QBc" customClass="CategoryViewController" customModule="MoyaPryazha" customModuleProvider="target" sceneMemberID="viewController">
@@ -255,7 +455,8 @@
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="hrQ-EQ-qsu"/>
                     </view>
-                    <navigationItem key="navigationItem" title="Каталог" id="f2O-rz-mCS">
+                    <navigationItem key="navigationItem" id="f2O-rz-mCS">
+                        <barButtonItem key="backBarButtonItem" title=" " id="Ora-rp-100"/>
                         <barButtonItem key="leftBarButtonItem" image="left" id="yAa-L9-0S3">
                             <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             <connections>
@@ -305,6 +506,7 @@
         <image name="Catalog" width="25" height="25"/>
         <image name="MPBackground" width="1024" height="768"/>
         <image name="MPLaunchScreen" width="375" height="667"/>
+        <image name="NoPhoto" width="624" height="624"/>
         <image name="left" width="22" height="22"/>
     </resources>
 </document>

@@ -15,33 +15,24 @@ class DataProvider {
     
     
     func downloadImage(url: URL, completion: @escaping (UIImage?) -> Void) {
-        if UserDefaults.standard.value(forKey: "LastModified") == nil {
-            imageCache.removeAllObjects()
-            UserDefaults.standard.set(Date(), forKey: "LastModified")
-        }
-        if let cachedImage = imageCache.object(forKey: url.absoluteString as NSString) {
-            completion(cachedImage)
-        } else {
-            let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 10)
-            let dataTask = URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
-                
-                guard error == nil,
-                    data != nil,
-                    let response = response as? HTTPURLResponse,
-                    response.statusCode == 200,
-                    let `self` = self else {
-                        return
-                }
-                
-                guard let image = UIImage(data: data!) else { return }
-                self.imageCache.setObject(image, forKey: url.absoluteString as NSString)
-                
-                DispatchQueue.main.async {
-                    completion(image)
-                }
+        let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 10)
+        let dataTask = URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            
+            guard error == nil,
+                data != nil,
+                let response = response as? HTTPURLResponse,
+                response.statusCode == 200,
+                let _ = self else {
+                    return
             }
-            dataTask.resume()
+            
+            guard let image = UIImage(data: data!) else { return }
+            DispatchQueue.main.async {
+                completion(image)
+            }
         }
+        dataTask.resume()
+        
     }
     
     

@@ -34,6 +34,10 @@
 		7ADFD93921370C6E00E19918 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7ADFD93721370C6E00E19918 /* LaunchScreen.storyboard */; };
 		7ADFD9452137126B00E19918 /* Tovar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7ADFD9442137126B00E19918 /* Tovar.swift */; };
 		7AE699EA21457A03000DC949 /* LastModified.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AE699E921457A03000DC949 /* LastModified.swift */; };
+		7AE9391B2157930D003C07BF /* ProductDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AE9391A2157930D003C07BF /* ProductDetailViewController.swift */; };
+		7AE9391D215793E4003C07BF /* ProductImageCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AE9391C215793E4003C07BF /* ProductImageCollectionViewCell.swift */; };
+		7AE9391F2157AEEB003C07BF /* ProductDetailTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AE9391E2157AEEB003C07BF /* ProductDetailTableViewCell.swift */; };
+		7AE939212157E101003C07BF /* ProductImageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AE939202157E101003C07BF /* ProductImageViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -84,6 +88,10 @@
 		7ADFD93A21370C6E00E19918 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7ADFD9442137126B00E19918 /* Tovar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tovar.swift; sourceTree = "<group>"; };
 		7AE699E921457A03000DC949 /* LastModified.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastModified.swift; sourceTree = "<group>"; };
+		7AE9391A2157930D003C07BF /* ProductDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductDetailViewController.swift; sourceTree = "<group>"; };
+		7AE9391C215793E4003C07BF /* ProductImageCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductImageCollectionViewCell.swift; sourceTree = "<group>"; };
+		7AE9391E2157AEEB003C07BF /* ProductDetailTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductDetailTableViewCell.swift; sourceTree = "<group>"; };
+		7AE939202157E101003C07BF /* ProductImageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductImageViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -191,11 +199,15 @@
 				7AAC05B0214520B0004AB93D /* Model */,
 				7ADFD92E21370C6C00E19918 /* AppDelegate.swift */,
 				7ADFD93221370C6C00E19918 /* Main.storyboard */,
+				7A720C92214D97240031EA86 /* LoadViewController.swift */,
 				7AC2F4522150CFD700E8DC34 /* CategoryViewController.swift */,
 				7AC2F4542150E3AD00E8DC34 /* CategoryTableViewCell.swift */,
-				7A720C92214D97240031EA86 /* LoadViewController.swift */,
 				7A1B039F2143D4DC009ED34C /* ProductListViewController.swift */,
 				7A18B6B62144FCEF00ED55A7 /* ProductListTableViewCell.swift */,
+				7AE9391A2157930D003C07BF /* ProductDetailViewController.swift */,
+				7AE9391C215793E4003C07BF /* ProductImageCollectionViewCell.swift */,
+				7AE9391E2157AEEB003C07BF /* ProductDetailTableViewCell.swift */,
+				7AE939202157E101003C07BF /* ProductImageViewController.swift */,
 				7A131F6C214C029A0082FAAB /* MoyaPryazha.xcdatamodeld */,
 				7AAC05B52145294B004AB93D /* Data */,
 				7AD9330421451A7800068926 /* Fonts */,
@@ -288,15 +300,19 @@
 				7A720C93214D97240031EA86 /* LoadViewController.swift in Sources */,
 				7AE699EA21457A03000DC949 /* LastModified.swift in Sources */,
 				7A18B6BB2145015A00ED55A7 /* DataProvider.swift in Sources */,
+				7AE9391F2157AEEB003C07BF /* ProductDetailTableViewCell.swift in Sources */,
 				7ADFD9452137126B00E19918 /* Tovar.swift in Sources */,
 				7A0629E8214C51E6009EA4B3 /* GlobalConstants.swift in Sources */,
+				7AE9391D215793E4003C07BF /* ProductImageCollectionViewCell.swift in Sources */,
 				7A18B6B72144FCEF00ED55A7 /* ProductListTableViewCell.swift in Sources */,
 				7A131F68214BFFDF0082FAAB /* CategoryJSON.swift in Sources */,
 				7A131F6A214C01DE0082FAAB /* ProductParameterJSON.swift in Sources */,
 				7A18B6B92144FF0C00ED55A7 /* ProductJSON.swift in Sources */,
 				7AAC05B42145231F004AB93D /* HitProducts.swift in Sources */,
+				7AE9391B2157930D003C07BF /* ProductDetailViewController.swift in Sources */,
 				7AC2F4532150CFD700E8DC34 /* CategoryViewController.swift in Sources */,
 				7ADFD92F21370C6C00E19918 /* AppDelegate.swift in Sources */,
+				7AE939212157E101003C07BF /* ProductImageViewController.swift in Sources */,
 				7AC2F4552150E3AD00E8DC34 /* CategoryTableViewCell.swift in Sources */,
 				7A1B03A02143D4DC009ED34C /* ProductListViewController.swift in Sources */,
 				7A11F3C6214ED380005184F7 /* CurrencyJSON.swift in Sources */,
