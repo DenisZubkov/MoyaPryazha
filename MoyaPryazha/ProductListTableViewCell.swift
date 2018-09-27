@@ -16,6 +16,7 @@ class ProductListTableViewCell: UITableViewCell {
     @IBOutlet weak var previewImage: UIImageView!
     @IBOutlet weak var nameLabel: UILabel!
     @IBOutlet weak var priceLabel: UILabel!
+    @IBOutlet weak var loadImageActivityView: UIActivityIndicatorView!
     
     @IBOutlet weak var siteButton: UIButton!
     

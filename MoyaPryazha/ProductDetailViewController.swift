@@ -29,6 +29,7 @@ class ProductDetailViewController: UIViewController, UICollectionViewDataSource,
     
     @IBOutlet weak var productImageButton: UIButton!
     
+    @IBOutlet weak var loadImageActivityIndicatorView: UIActivityIndicatorView!
     @IBOutlet weak var productImageCollectionView: UICollectionView!
     @IBOutlet weak var productDetailTableView: UITableView!
     
@@ -66,9 +67,14 @@ class ProductDetailViewController: UIViewController, UICollectionViewDataSource,
         productImageButton.imageView?.contentMode = .scaleAspectFit
         let productPicture = viewProductPictures[0]
         if productPicture.image == nil {
+            loadImageActivityIndicatorView.isHidden = false
+            loadImageActivityIndicatorView.startAnimating()
             if let url = productPicture.path, let imageURL = URL(string: "\(globalConstants.moyaPryazhaSite)\(url.replacingOccurrences(of: " ", with: "%20"))") {
                 self.dataProvider.downloadImage(url: imageURL) { image in
-                    guard let image = image else { return }
+                    guard let image = image else {
+                        self.loadImageActivityIndicatorView.isHidden = true
+                        self.loadImageActivityIndicatorView.stopAnimating()
+                        return }
                     self.setButtonImage(image: image)
                     productPicture.image = image.pngData()
                     do {
@@ -76,6 +82,8 @@ class ProductDetailViewController: UIViewController, UICollectionViewDataSource,
                     } catch let error as NSError {
                         print(error)
                     }
+                    self.loadImageActivityIndicatorView.isHidden = true
+                    self.loadImageActivityIndicatorView.stopAnimating()
                 }
             } else {
                 self.setButtonImage(image: UIImage(named: "NoPhoto")!)
@@ -91,13 +99,21 @@ class ProductDetailViewController: UIViewController, UICollectionViewDataSource,
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "ProductCell", for: indexPath) as! ProductImageCollectionViewCell
+        cell.productPreviewActivityIndicatorView.isHidden = false
+        cell.productPreviewActivityIndicatorView.startAnimating()
         let productPicture = viewProductPictures[indexPath.row]
         if productPicture.image == nil {
             if let url = productPicture.path, let imageURL = URL(string: "\(globalConstants.moyaPryazhaSite)\(url.replacingOccurrences(of: " ", with: "%20"))") {
                 self.dataProvider.downloadImage(url: imageURL) { image in
-                    guard let image = image else { return }
+                    guard let image = image else {
+                        cell.productPreviewActivityIndicatorView.isHidden = true
+                        cell.productPreviewActivityIndicatorView.startAnimating()
+                        return
+                    }
                     cell.productPreviewImageView.image = image
                     productPicture.image = image.pngData()
+                    cell.productPreviewActivityIndicatorView.isHidden = true
+                    cell.productPreviewActivityIndicatorView.startAnimating()
                     do {
                         try self.context.save()
                     } catch let error as NSError {
@@ -106,9 +122,13 @@ class ProductDetailViewController: UIViewController, UICollectionViewDataSource,
                 }
             } else {
                 cell.productPreviewImageView.image = UIImage(named: "NoPhoto")
+                cell.productPreviewActivityIndicatorView.isHidden = true
+                cell.productPreviewActivityIndicatorView.startAnimating()
             }
         } else {
             cell.productPreviewImageView.image = UIImage(data: productPicture.image!)
+            cell.productPreviewActivityIndicatorView.isHidden = true
+            cell.productPreviewActivityIndicatorView.startAnimating()
         }
         return cell
     }

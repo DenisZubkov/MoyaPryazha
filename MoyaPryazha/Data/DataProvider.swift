@@ -23,10 +23,18 @@ class DataProvider {
                 let response = response as? HTTPURLResponse,
                 response.statusCode == 200,
                 let _ = self else {
+                    DispatchQueue.main.async {
+                        completion(nil)
+                    }
                     return
             }
             
-            guard let image = UIImage(data: data!) else { return }
+            guard let image = UIImage(data: data!) else {
+                DispatchQueue.main.async {
+                    completion(nil)
+                }
+                return
+            }
             DispatchQueue.main.async {
                 completion(image)
             }

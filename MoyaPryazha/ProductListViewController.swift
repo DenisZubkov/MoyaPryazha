@@ -18,15 +18,38 @@ class ProductListViewController: UIViewController, UITableViewDelegate, UITableV
     var viewProducts: [Product] = []
     let coreDataStack = CoreDataStack()
     var context: NSManagedObjectContext!
+    var searchController: UISearchController!
+    var filteredResultArray: [Product] = []
     
-    @IBOutlet weak var ProductListTableView: UITableView!
+    @IBOutlet weak var productListTableView: UITableView!
     
     
-    
+    func filterContentFor(searchText text: String) {
+        filteredResultArray = viewProducts.filter { (product) -> Bool in
+            if (product.name?.lowercased().contains(text.lowercased()))! ||
+                (product.category?.name!.lowercased().contains(text.lowercased()))!
+            {
+                return true
+            }
+            return false
+            
+        }
+    }
     
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        context = coreDataStack.persistentContainer.viewContext
+        searchController = UISearchController(searchResultsController: nil)
+        searchController.searchResultsUpdater = self
+        searchController.dimsBackgroundDuringPresentation = false
+        searchController.searchBar.setValue("Отмена", forKey: "_cancelButtonText")
+        searchController.searchBar.placeholder = "Искать..."
+        productListTableView.tableHeaderView = searchController.searchBar
+        definesPresentationContext = true
+        searchController.searchBar.barTintColor = #colorLiteral(red: 0.9882352941, green: 0.6470588235, blue: 0.02352941176, alpha: 1)
+        searchController.searchBar.tintColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
+        
         
         navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
         navigationController?.navigationBar.shadowImage = UIImage()
@@ -34,15 +57,22 @@ class ProductListViewController: UIViewController, UITableViewDelegate, UITableV
         tabBarController?.tabBar.tintColor = .white
         //tabBarController?.tabBar.unselectedItemTintColor = UIColor.black
         //title = currentCategory?.name
+        
         let titleLabel = UILabel()
-        titleLabel.text = currentCategory?.name
+        titleLabel.text = currentCategory == nil ? "Все товары" : currentCategory?.name
         titleLabel.font = UIFont(name: "AaarghCyrillicBold", size: 17) // Нужный шрифт
         titleLabel.textColor = UIColor.white
         titleLabel.textAlignment = .center
         titleLabel.adjustsFontSizeToFitWidth = true
         titleLabel.minimumScaleFactor = 0.75 // Минимальный относительный размер шрифта
         navigationItem.titleView = titleLabel
-        viewProducts = rootViewController.products.filter({$0.category == currentCategory})
+        if currentCategory == nil {
+            viewProducts = rootViewController.products
+           
+        } else {
+            viewProducts = rootViewController.products.filter({$0.category == currentCategory})
+        }
+        viewProducts = viewProducts.sorted(by: {$0.order < $1.order})
         
     }
     
@@ -50,13 +80,27 @@ class ProductListViewController: UIViewController, UITableViewDelegate, UITableV
     
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if searchController.isActive && searchController.searchBar.text != nil {
+            return filteredResultArray.count
+        }
         return viewProducts.count
     }
     
+    
+    func productsToDisplayAt(indexPath: IndexPath) -> Product {
+        let productToDisplay: Product
+        if searchController.isActive && searchController.searchBar.text != nil {
+            productToDisplay = filteredResultArray[indexPath.row]
+        } else {
+            productToDisplay =  viewProducts[indexPath.row]
+        }
+        return productToDisplay
+    }
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = ProductListTableView.dequeueReusableCell(withIdentifier: "ProductCell", for: indexPath) as! ProductListTableViewCell
+        let cell = productListTableView.dequeueReusableCell(withIdentifier: "ProductCell", for: indexPath) as! ProductListTableViewCell
         cell.siteButton.layer.cornerRadius = 15
-        let product = viewProducts[indexPath.row]
+        let product = productsToDisplayAt(indexPath: indexPath)
         cell.nameLabel.text = product.name
         if let price = rootViewController.prices.filter({$0.product == product && $0.priceType?.id ?? 1 == 1}).first?.price {
             if price == 0 {
@@ -65,22 +109,42 @@ class ProductListViewController: UIViewController, UITableViewDelegate, UITableV
                 cell.priceLabel.text = "\(price) руб."
             }
         }
-        if let url = product.thumbnailPath {
-            if let imageURL = URL(string: "\(globalConstants.moyaPryazhaSite)\(url.replacingOccurrences(of: " ", with: "%20"))") {
-                self.dataProvider.downloadImage(url: imageURL) { image in
-                    if self.viewProducts[indexPath.row].thumbnail == nil {
-                        self.dataProvider.downloadImage(url: imageURL) { image in
-                            guard let image = image else { return }
-                            cell.previewImage.image = image
-                            self.addProductThumbnailToCoreData(thumbnail: image.pngData(), id: self.viewProducts[indexPath.row].id)
+        cell.previewImage.image = nil
+        if let thumbnail = product.thumbnail {
+            cell.previewImage.image = UIImage(data: thumbnail)
+        } else {
+            if product.thumbnailPath != nil {
+                if let url = product.thumbnailPath, let imageURL = URL(string: "\(globalConstants.moyaPryazhaSite)\(url.replacingOccurrences(of: " ", with: "%20"))") {
+                    cell.loadImageActivityView.isHidden = false
+                    cell.loadImageActivityView.startAnimating()
+                    self.dataProvider.downloadImage(url: imageURL) { image in
+                        guard let image = image else {
+                            cell.loadImageActivityView.isHidden = true
+                            cell.loadImageActivityView.stopAnimating()
+                            return
                         }
-                    } else {
-                        cell.previewImage.image = UIImage(data: self.viewProducts[indexPath.row].thumbnail!)
+                        cell.previewImage.image = image
+                        product.thumbnail = image.pngData()
+                        do {
+                            try self.context.save()
+                        } catch let error as NSError {
+                            print(error)
+                            cell.loadImageActivityView.isHidden = true
+                            cell.loadImageActivityView.stopAnimating()
+                        }
+                    cell.loadImageActivityView.isHidden = true
+                    cell.loadImageActivityView.stopAnimating()
                     }
+                } else {
+                    cell.previewImage.image = UIImage(named: "NoPhoto")
                 }
-
+            } else {
+                cell.previewImage.image = UIImage(named: "NoPhoto")
             }
         }
+        
+ 
+
         return cell
     }
     
@@ -134,12 +198,21 @@ class ProductListViewController: UIViewController, UITableViewDelegate, UITableV
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "ProductDetailSegue" {
-            if let indexPath = ProductListTableView.indexPathForSelectedRow {
-                let currentProduct = viewProducts[indexPath.row]
+            if let indexPath = productListTableView.indexPathForSelectedRow {
+                let currentProduct = productsToDisplayAt(indexPath: indexPath)
                 let dvc = segue.destination as! ProductDetailViewController
                 dvc.currentProduct = currentProduct
             }
         }
     }
+    
+}
+
+extension ProductListViewController: UISearchResultsUpdating {
+    func updateSearchResults(for searchController: UISearchController) {
+        filterContentFor(searchText: searchController.searchBar.text!)
+        productListTableView.reloadData()
+    }
+    
     
 }
