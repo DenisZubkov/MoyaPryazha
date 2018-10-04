@@ -168,6 +168,34 @@
 			path = Data;
 			sourceTree = "<group>";
 		};
+		7AC61557215DED4C00D4032B /* CategoryView */ = {
+			isa = PBXGroup;
+			children = (
+				7AC2F4522150CFD700E8DC34 /* CategoryViewController.swift */,
+				7AC2F4542150E3AD00E8DC34 /* CategoryTableViewCell.swift */,
+			);
+			path = CategoryView;
+			sourceTree = "<group>";
+		};
+		7AC61558215DED6200D4032B /* ProductListView */ = {
+			isa = PBXGroup;
+			children = (
+				7A1B039F2143D4DC009ED34C /* ProductListViewController.swift */,
+				7A18B6B62144FCEF00ED55A7 /* ProductListTableViewCell.swift */,
+			);
+			path = ProductListView;
+			sourceTree = "<group>";
+		};
+		7AC61559215DED7300D4032B /* ProductDetailView */ = {
+			isa = PBXGroup;
+			children = (
+				7AE9391A2157930D003C07BF /* ProductDetailViewController.swift */,
+				7AE9391C215793E4003C07BF /* ProductImageCollectionViewCell.swift */,
+				7AE9391E2157AEEB003C07BF /* ProductDetailTableViewCell.swift */,
+			);
+			path = ProductDetailView;
+			sourceTree = "<group>";
+		};
 		7AD9330421451A7800068926 /* Fonts */ = {
 			isa = PBXGroup;
 			children = (
@@ -197,19 +225,15 @@
 			isa = PBXGroup;
 			children = (
 				7AAC05B0214520B0004AB93D /* Model */,
+				7AAC05B52145294B004AB93D /* Data */,
 				7ADFD92E21370C6C00E19918 /* AppDelegate.swift */,
 				7ADFD93221370C6C00E19918 /* Main.storyboard */,
 				7A720C92214D97240031EA86 /* LoadViewController.swift */,
-				7AC2F4522150CFD700E8DC34 /* CategoryViewController.swift */,
-				7AC2F4542150E3AD00E8DC34 /* CategoryTableViewCell.swift */,
-				7A1B039F2143D4DC009ED34C /* ProductListViewController.swift */,
-				7A18B6B62144FCEF00ED55A7 /* ProductListTableViewCell.swift */,
-				7AE9391A2157930D003C07BF /* ProductDetailViewController.swift */,
-				7AE9391C215793E4003C07BF /* ProductImageCollectionViewCell.swift */,
-				7AE9391E2157AEEB003C07BF /* ProductDetailTableViewCell.swift */,
+				7AC61557215DED4C00D4032B /* CategoryView */,
+				7AC61558215DED6200D4032B /* ProductListView */,
+				7AC61559215DED7300D4032B /* ProductDetailView */,
 				7AE939202157E101003C07BF /* ProductImageViewController.swift */,
 				7A131F6C214C029A0082FAAB /* MoyaPryazha.xcdatamodeld */,
-				7AAC05B52145294B004AB93D /* Data */,
 				7AD9330421451A7800068926 /* Fonts */,
 				7ADFD93521370C6E00E19918 /* Assets.xcassets */,
 				7ADFD93721370C6E00E19918 /* LaunchScreen.storyboard */,

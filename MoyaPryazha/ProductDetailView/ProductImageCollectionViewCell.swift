@@ -11,6 +11,6 @@ import UIKit
 class ProductImageCollectionViewCell: UICollectionViewCell {
     
     @IBOutlet weak var productPreviewImageView: UIImageView!
-    
     @IBOutlet weak var productPreviewActivityIndicatorView: UIActivityIndicatorView!
+    
 }

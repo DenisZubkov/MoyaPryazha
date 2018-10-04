@@ -11,6 +11,7 @@ import CoreData
 
 class ProductListViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     
+    
     let dataProvider = DataProvider()
     let globalConstants = GlobalConstants()
     let rootViewController = AppDelegate.shared.rootViewController
@@ -24,40 +25,13 @@ class ProductListViewController: UIViewController, UITableViewDelegate, UITableV
     @IBOutlet weak var productListTableView: UITableView!
     
     
-    func filterContentFor(searchText text: String) {
-        filteredResultArray = viewProducts.filter { (product) -> Bool in
-            if (product.name?.lowercased().contains(text.lowercased()))! ||
-                (product.category?.name!.lowercased().contains(text.lowercased()))!
-            {
-                return true
-            }
-            return false
-            
-        }
-    }
-    
-
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         context = coreDataStack.persistentContainer.viewContext
-        searchController = UISearchController(searchResultsController: nil)
-        searchController.searchResultsUpdater = self
-        searchController.dimsBackgroundDuringPresentation = false
-        searchController.searchBar.setValue("Отмена", forKey: "_cancelButtonText")
-        searchController.searchBar.placeholder = "Искать..."
-        productListTableView.tableHeaderView = searchController.searchBar
-        definesPresentationContext = true
-        searchController.searchBar.barTintColor = #colorLiteral(red: 0.9882352941, green: 0.6470588235, blue: 0.02352941176, alpha: 1)
-        searchController.searchBar.tintColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
-        
-        
         navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
         navigationController?.navigationBar.shadowImage = UIImage()
-        //tabBarController?.tabBar.backgroundImage = UIImage()
         tabBarController?.tabBar.tintColor = .white
-        //tabBarController?.tabBar.unselectedItemTintColor = UIColor.black
-        //title = currentCategory?.name
-        
         let titleLabel = UILabel()
         titleLabel.text = currentCategory == nil ? "Все товары" : currentCategory?.name
         titleLabel.font = UIFont(name: "AaarghCyrillicBold", size: 17) // Нужный шрифт
@@ -66,9 +40,11 @@ class ProductListViewController: UIViewController, UITableViewDelegate, UITableV
         titleLabel.adjustsFontSizeToFitWidth = true
         titleLabel.minimumScaleFactor = 0.75 // Минимальный относительный размер шрифта
         navigationItem.titleView = titleLabel
+        searchController = UISearchController(searchResultsController: nil)
         if currentCategory == nil {
             viewProducts = rootViewController.products
-           
+            setSearchController()
+            navigationItem.titleView = searchController.searchBar
         } else {
             viewProducts = rootViewController.products.filter({$0.category == currentCategory})
         }
@@ -143,14 +119,8 @@ class ProductListViewController: UIViewController, UITableViewDelegate, UITableV
             }
         }
         
- 
-
         return cell
     }
-    
-//    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-//         performSegue(withIdentifier: "ProductDetailSegue", sender: nil)
-//    }
     
     func addProductThumbnailToCoreData(thumbnail: Data?, id: Int32) {
         context = coreDataStack.persistentContainer.viewContext
@@ -173,6 +143,31 @@ class ProductListViewController: UIViewController, UITableViewDelegate, UITableV
     
     override var preferredStatusBarStyle: UIStatusBarStyle {
         return .lightContent
+    }
+    
+    func setSearchController() {
+        //searchController = UISearchController(searchResultsController: nil)
+        searchController.searchResultsUpdater = self
+        searchController.dimsBackgroundDuringPresentation = false
+        searchController.searchBar.setValue("Отмена", forKey: "_cancelButtonText")
+        searchController.searchBar.placeholder = "Искать..."
+        searchController.hidesNavigationBarDuringPresentation = false
+        //productListTableView.tableHeaderView = searchController.searchBar
+        definesPresentationContext = true
+        searchController.searchBar.barTintColor = #colorLiteral(red: 0.9882352941, green: 0.6470588235, blue: 0.02352941176, alpha: 1)
+        searchController.searchBar.tintColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
+    }
+    
+    func filterContentFor(searchText text: String) {
+        filteredResultArray = viewProducts.filter { (product) -> Bool in
+            if (product.name?.lowercased().contains(text.lowercased()))! ||
+                (product.category?.name!.lowercased().contains(text.lowercased()))!
+            {
+                return true
+            }
+            return false
+            
+        }
     }
     
     func getPathForProduct(product:Product) -> String? {
@@ -206,13 +201,13 @@ class ProductListViewController: UIViewController, UITableViewDelegate, UITableV
         }
     }
     
+    
 }
 
 extension ProductListViewController: UISearchResultsUpdating {
+    
     func updateSearchResults(for searchController: UISearchController) {
         filterContentFor(searchText: searchController.searchBar.text!)
         productListTableView.reloadData()
     }
-    
-    
 }

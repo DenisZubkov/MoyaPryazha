@@ -74,15 +74,25 @@ class CategoryViewController: UIViewController, UITableViewDataSource, UITableVi
             if let url = category.thumbnailPath {
                 
                 if let imageURL = URL(string: "\(globalConstants.moyaPryazhaSite)\(url.replacingOccurrences(of: " ", with: "%20"))") {
+                    cell.loadActivityIndicator.isHidden = false
+                    cell.loadActivityIndicator.startAnimating()
                     self.dataProvider.downloadImage(url: imageURL) { image in
-                        guard let image = image else { return }
+                        guard let image = image else {
+                            cell.loadActivityIndicator.isHidden = true
+                            cell.loadActivityIndicator.stopAnimating()
+                            return
+                        }
                         cell.thumbnailImage.image = image
                         category.thumbnail = image.pngData()
                         do {
                             try self.context.save()
                         } catch let error as NSError {
+                            cell.loadActivityIndicator.isHidden = true
+                            cell.loadActivityIndicator.stopAnimating()
                             print(error)
                         }
+                        cell.loadActivityIndicator.isHidden = true
+                        cell.loadActivityIndicator.stopAnimating()
                     }
                     
                 } else {
@@ -162,6 +172,7 @@ class CategoryViewController: UIViewController, UITableViewDataSource, UITableVi
                 let currentCategory = viewCategories[indexPath.row]
                 let dvc = segue.destination as! ProductListViewController
                 dvc.currentCategory = currentCategory
+
             }
         }
     }

@@ -38,21 +38,16 @@ class ProductDetailViewController: UIViewController, UICollectionViewDataSource,
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        setNavigationBar()
         context = coreDataStack.persistentContainer.viewContext
-        viewProductPictures = rootViewController.productPictures.filter({$0.product == currentProduct})
-        viewProductPictures = viewProductPictures.sorted(by: {$0.order < $1.order})
-        viewProductParameters = rootViewController.productParameters.filter({$0.product == currentProduct})
-        viewProductParameters = viewProductParameters.sorted(by: {$0.parameter?.order ?? 0 < $1.parameter?.order ?? 0})
-        var priceValue = "Под заказ"
-        if let price = rootViewController.prices.filter({$0.product == currentProduct && $0.priceType?.id ?? 1 == 1}).first?.price {
-            if price != 0 {
-                priceValue = "\(price) руб."
-            }
-        }
-        tableParameters.append(TableParameter(key: "Цена", value: priceValue))
-        for productParameter in viewProductParameters {
-            tableParameters.append(TableParameter(key: productParameter.parameter?.name ?? "", value: productParameter.value ?? ""))
-        }
+        guard let product = currentProduct else { return }
+        setProductData(for: product)
+        loadMainImage()
+    }
+    
+    // MARK: SET VIEW FUNCTIONS
+    
+    func setNavigationBar() {
         navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
         navigationController?.navigationBar.shadowImage = UIImage()
         tabBarController?.tabBar.tintColor = .white
@@ -64,6 +59,40 @@ class ProductDetailViewController: UIViewController, UICollectionViewDataSource,
         titleLabel.adjustsFontSizeToFitWidth = true
         titleLabel.minimumScaleFactor = 0.75 // Минимальный относительный размер шрифта
         navigationItem.titleView = titleLabel
+    }
+    
+    
+    func setProductData(for product: Product) {
+        viewProductPictures = rootViewController.productPictures.filter({$0.product == product})
+        viewProductPictures = viewProductPictures.sorted(by: {$0.order < $1.order})
+        viewProductParameters = rootViewController.productParameters.filter({$0.product == product})
+        viewProductParameters = viewProductParameters.sorted(by: {$0.parameter?.order ?? 0 < $1.parameter?.order ?? 0})
+        
+        var priceValue = "Под заказ"
+        if let price = rootViewController.prices.filter({$0.product == product && $0.priceType?.id ?? 1 == 1}).first?.price {
+            if price != 0 {
+                priceValue = "\(price) руб."
+            }
+        }
+        tableParameters.append(TableParameter(key: "Цена", value: priceValue))
+        
+        let key = "Категория"
+        guard var parentCategory = product.category?.parentId else { return }
+        guard var value = product.category?.name else { return }
+        while parentCategory != 0 {
+            guard let category = rootViewController.categories.filter({$0.id == parentCategory}).first else { return }
+            guard let name = category.name else { return }
+            value = "\(name) / \(value)"
+            parentCategory = category.parentId
+        }
+        tableParameters.append(TableParameter(key: key, value: value))
+        
+        for productParameter in viewProductParameters {
+            tableParameters.append(TableParameter(key: productParameter.parameter?.name ?? "", value: productParameter.value ?? ""))
+        }
+    }
+    
+    func loadMainImage() {
         productImageButton.imageView?.contentMode = .scaleAspectFit
         let productPicture = viewProductPictures[0]
         if productPicture.image == nil {
@@ -92,6 +121,8 @@ class ProductDetailViewController: UIViewController, UICollectionViewDataSource,
             self.setButtonImage(image: UIImage(data: productPicture.image!)!)
         }
     }
+    
+    // MARK: COLLECTION VIEW
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return viewProductPictures.count
@@ -141,6 +172,12 @@ class ProductDetailViewController: UIViewController, UICollectionViewDataSource,
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return tableParameters.count
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if tableParameters[indexPath.row].key == "Категория" {
+            
+        }
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {

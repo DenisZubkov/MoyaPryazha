@@ -49,33 +49,33 @@ class LoadViewController: UIViewController {
         
         // Date last modify data on server
 
-        loadProgressView.progress = 0
+        loadProgressView.setProgress(0, animated: true)
         guard let date = getModifiedDate() else { return true }
         UserDefaults.standard.set(date, forKey: "LastModified")
         self.lastModifiedDate = date
         
         // Categories array
         
-        loadProgressView.progress = 0.125
+        loadProgressView.setProgress(0.125, animated: true)
         guard let categories = getCategories() else { return true }
         self.categories = categories
         
         // Products array
         
-        loadProgressView.progress = 0.25
+        loadProgressView.setProgress(0.25, animated: true)
         guard let products = getProducts() else { return true }
         self.products = products
         
         // Currencies array
         
-        loadProgressView.progress = 0.375
+        loadProgressView.setProgress(0.375, animated: true)
         guard let currencies = getCurrencies() else { return true }
         self.currencies = currencies
 
         
         // Prices array
         
-        loadProgressView.progress = 0.5
+        loadProgressView.setProgress(0.5, animated: true)
         guard let priceTypes = getPriceTypes() else { return true }
         self.priceTypes = priceTypes
         print(self.priceTypes.count)
@@ -86,25 +86,25 @@ class LoadViewController: UIViewController {
         // Parameters array
         
         
-        loadProgressView.progress = 0.625
+        loadProgressView.setProgress(0.625, animated: true)
         guard let parameters = getParameters() else { return true }
         self.parameters = parameters
         
         // Product parameters array
         
-        loadProgressView.progress = 0.750
+        loadProgressView.setProgress(0.75, animated: true)
         guard let productParameters = getProductParameters() else { return true }
         self.productParameters = productParameters
  
         // Hits array
         
-        loadProgressView.progress = 0.875
+        loadProgressView.setProgress(0.875, animated: true)
         guard let hits = getHits() else { return true }
         self.hits = hits
 
         // Product pictures array
         
-        loadProgressView.progress = 1
+        loadProgressView.setProgress(1.0, animated: true)
         guard let productPictures = getProductPictures() else { return true }
         self.productPictures = productPictures
         return false
@@ -112,7 +112,7 @@ class LoadViewController: UIViewController {
     }
     
     func getData(url: URL) -> Data? {
-        let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: 10)
+        let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: 50)
         var dataLoad: Data?
         var isLoad = false
         let dataTask = URLSession.shared.dataTask(with: request) { data, response, error in
@@ -121,15 +121,13 @@ class LoadViewController: UIViewController {
             if error != nil {
                 message = error?.localizedDescription
                 title = "Ошибка"
-            }
-            if data == nil {
+            } else if data == nil {
                 message = "Не удалось получить данные :("
                 title = "Ошибка данных"
-            }
-            if let response = response as? HTTPURLResponse {
+            } else if let response = response as? HTTPURLResponse {
                 if response.statusCode != 200 {
-                    message = HTTPURLResponse.localizedString(forStatusCode: response.statusCode)
-                    title = "Ошибка сервера данных"
+                    message = "\(response.statusCode)  \(HTTPURLResponse.localizedString(forStatusCode: response.statusCode)) "
+                    title = "Ошибка сервера данных \(url)"
                 }
             } else {
                 message = "Нет ответа от сервера"
@@ -271,7 +269,7 @@ class LoadViewController: UIViewController {
             // присваиваем переданные свойства
             categoryCurrent.id = Int32(category.id) ?? 0
             var categoryName: String? = category.name
-            categoryName = categoryName?.components(separatedBy: "ВЫБЕРИТЕ ПОДКАТЕГОРИЮ").first
+            categoryName = categoryName?.components(separatedBy: " ВЫБЕРИТЕ ПОДКАТЕГОРИЮ").first
             categoryCurrent.name = categoryName ?? category.name
             categoryCurrent.picturePath = category.picture
             categoryCurrent.thumbnailPath = category.thumbnail
