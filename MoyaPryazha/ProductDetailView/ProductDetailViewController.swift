@@ -138,13 +138,13 @@ class ProductDetailViewController: UIViewController, UICollectionViewDataSource,
                 self.dataProvider.downloadImage(url: imageURL) { image in
                     guard let image = image else {
                         cell.productPreviewActivityIndicatorView.isHidden = true
-                        cell.productPreviewActivityIndicatorView.startAnimating()
+                        cell.productPreviewActivityIndicatorView.stopAnimating()
                         return
                     }
                     cell.productPreviewImageView.image = image
                     productPicture.image = image.pngData()
                     cell.productPreviewActivityIndicatorView.isHidden = true
-                    cell.productPreviewActivityIndicatorView.startAnimating()
+                    cell.productPreviewActivityIndicatorView.stopAnimating()
                     do {
                         try self.context.save()
                     } catch let error as NSError {
@@ -154,12 +154,12 @@ class ProductDetailViewController: UIViewController, UICollectionViewDataSource,
             } else {
                 cell.productPreviewImageView.image = UIImage(named: "NoPhoto")
                 cell.productPreviewActivityIndicatorView.isHidden = true
-                cell.productPreviewActivityIndicatorView.startAnimating()
+                cell.productPreviewActivityIndicatorView.stopAnimating()
             }
         } else {
             cell.productPreviewImageView.image = UIImage(data: productPicture.image!)
             cell.productPreviewActivityIndicatorView.isHidden = true
-            cell.productPreviewActivityIndicatorView.startAnimating()
+            cell.productPreviewActivityIndicatorView.stopAnimating()
         }
         return cell
     }

@@ -24,14 +24,14 @@ class DataProvider {
                 response.statusCode == 200,
                 let _ = self else {
                     DispatchQueue.main.async {
-                        completion(nil)
+                        completion(UIImage(named: "NoPhoto"))
                     }
                     return
             }
             
             guard let image = UIImage(data: data!) else {
                 DispatchQueue.main.async {
-                    completion(nil)
+                    completion(UIImage(named: "NoPhoto"))
                 }
                 return
             }

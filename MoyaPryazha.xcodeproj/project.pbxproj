@@ -226,8 +226,8 @@
 			children = (
 				7AAC05B0214520B0004AB93D /* Model */,
 				7AAC05B52145294B004AB93D /* Data */,
-				7ADFD92E21370C6C00E19918 /* AppDelegate.swift */,
 				7ADFD93221370C6C00E19918 /* Main.storyboard */,
+				7ADFD92E21370C6C00E19918 /* AppDelegate.swift */,
 				7A720C92214D97240031EA86 /* LoadViewController.swift */,
 				7AC61557215DED4C00D4032B /* CategoryView */,
 				7AC61558215DED6200D4032B /* ProductListView */,

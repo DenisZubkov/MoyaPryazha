@@ -53,6 +53,7 @@ class CategoryViewController: UIViewController, UITableViewDataSource, UITableVi
         backBarButtonItem.image = nil
         viewCategories = rootViewController.categories.filter({$0.parentId == categoryLevel})
         viewCategories = viewCategories.sorted(by: {$0.order < $1.order})
+        tableView.tableFooterView = UIView(frame: CGRect.zero)
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
 
@@ -68,11 +69,16 @@ class CategoryViewController: UIViewController, UITableViewDataSource, UITableVi
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath) as! CategoryTableViewCell
+        cell.thumbnailImage.layer.cornerRadius = 70
+        cell.thumbnailImage.layer.borderWidth = 3
+        cell.thumbnailImage.layer.borderColor = #colorLiteral(red: 0.9882352941, green: 0.6470588235, blue: 0.02352941176, alpha: 1)
+        cell.thumbnailImage.clipsToBounds = true
+        cell.loadActivityIndicator.isHidden = true
+        cell.loadActivityIndicator.stopAnimating()
         let category = viewCategories[indexPath.row]
         cell.nameLabel.text = category.name
         if category.thumbnail == nil {
             if let url = category.thumbnailPath {
-                
                 if let imageURL = URL(string: "\(globalConstants.moyaPryazhaSite)\(url.replacingOccurrences(of: " ", with: "%20"))") {
                     cell.loadActivityIndicator.isHidden = false
                     cell.loadActivityIndicator.startAnimating()
@@ -121,6 +127,8 @@ class CategoryViewController: UIViewController, UITableViewDataSource, UITableVi
             let title = currentViewCategories[indexPath.row].name
             titleLabel.text = title
             tableView.reloadData()
+            let indexPath = IndexPath(row: 0, section: 0)
+            tableView.scrollToRow(at: indexPath, at: UITableView.ScrollPosition.middle, animated: true)
             willGoProducts = false
         } else {
             if let currentCategory = currentViewCategories.first?.parentId {
@@ -131,6 +139,7 @@ class CategoryViewController: UIViewController, UITableViewDataSource, UITableVi
             performSegue(withIdentifier: "CategoryProductSegue", sender: nil)
             willGoProducts = false
         }
+        
     }
     
     
@@ -151,6 +160,8 @@ class CategoryViewController: UIViewController, UITableViewDataSource, UITableVi
             backBarButtonItem.isEnabled = categoryLevel != 0
             backBarButtonItem.image = categoryLevel != 0 ? UIImage(named: "left") : nil
             tableView.reloadData()
+            let indexPath = IndexPath(row: 0, section: 0)
+            tableView.scrollToRow(at: indexPath, at: UITableView.ScrollPosition.middle, animated: true)
         }
         
         

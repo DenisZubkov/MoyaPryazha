@@ -49,6 +49,7 @@ class ProductListViewController: UIViewController, UITableViewDelegate, UITableV
             viewProducts = rootViewController.products.filter({$0.category == currentCategory})
         }
         viewProducts = viewProducts.sorted(by: {$0.order < $1.order})
+        productListTableView.tableFooterView = UIView(frame: CGRect.zero)
         
     }
     
