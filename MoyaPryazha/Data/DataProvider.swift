@@ -86,9 +86,9 @@ class DataProvider {
     }
     
     func getModifiedDate() -> Bool {
-        let globalConstants = GlobalConstants()
+        let globalSettings = GlobalSettings()
         let dataProvider = DataProvider()
-        let urlLastModified = globalConstants.moyaPryazhaSite + globalConstants.moyaPryazhaServicesPath + "srvLastModufied.php"
+        let urlLastModified = globalSettings.moyaPryazhaSite + globalSettings.moyaPryazhaServicesPath + "srvLastModufied.php"
         if let lastModifiedURL = URL(string: urlLastModified) {
             dataProvider.downloadModifiedDate(url: lastModifiedURL) { lastModified in
                 guard let lastModified = lastModified else { return }

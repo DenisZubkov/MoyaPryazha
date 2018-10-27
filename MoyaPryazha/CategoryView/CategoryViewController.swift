@@ -17,7 +17,7 @@ class CategoryViewController: UIViewController, UITableViewDataSource, UITableVi
     
     
     let dataProvider = DataProvider()
-    let globalConstants = GlobalConstants()
+    let globalSettings = GlobalSettings()
     let rootViewController = AppDelegate.shared.rootViewController
     var categoryLevel: Int32 = 0
     var viewCategories: [Category] = []
@@ -79,7 +79,7 @@ class CategoryViewController: UIViewController, UITableViewDataSource, UITableVi
         cell.nameLabel.text = category.name
         if category.thumbnail == nil {
             if let url = category.thumbnailPath {
-                if let imageURL = URL(string: "\(globalConstants.moyaPryazhaSite)\(url.replacingOccurrences(of: " ", with: "%20"))") {
+                if let imageURL = URL(string: "\(globalSettings.moyaPryazhaSite)\(url.replacingOccurrences(of: " ", with: "%20"))") {
                     cell.loadActivityIndicator.isHidden = false
                     cell.loadActivityIndicator.startAnimating()
                     self.dataProvider.downloadImage(url: imageURL) { image in

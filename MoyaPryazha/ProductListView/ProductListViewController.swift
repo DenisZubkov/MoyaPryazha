@@ -13,7 +13,7 @@ class ProductListViewController: UIViewController, UITableViewDelegate, UITableV
     
     
     let dataProvider = DataProvider()
-    let globalConstants = GlobalConstants()
+    let globalSettings = GlobalSettings()
     let rootViewController = AppDelegate.shared.rootViewController
     var currentCategory: Category?
     var viewProducts: [Product] = []
@@ -44,13 +44,12 @@ class ProductListViewController: UIViewController, UITableViewDelegate, UITableV
         if currentCategory == nil {
             viewProducts = rootViewController.products
             setSearchController()
-            navigationItem.titleView = searchController.searchBar
+            //navigationItem.titleView = searchController.searchBar
         } else {
             viewProducts = rootViewController.products.filter({$0.category == currentCategory})
         }
-        viewProducts = viewProducts.sorted(by: {$0.order < $1.order})
+        viewProducts = viewProducts.sorted(by: {$0.id < $1.id})
         productListTableView.tableFooterView = UIView(frame: CGRect.zero)
-        
     }
     
     
@@ -91,7 +90,7 @@ class ProductListViewController: UIViewController, UITableViewDelegate, UITableV
             cell.previewImage.image = UIImage(data: thumbnail)
         } else {
             if product.thumbnailPath != nil {
-                if let url = product.thumbnailPath, let imageURL = URL(string: "\(globalConstants.moyaPryazhaSite)\(url.replacingOccurrences(of: " ", with: "%20"))") {
+                if let url = product.thumbnailPath, let imageURL = URL(string: "\(globalSettings.moyaPryazhaSite)\(url.replacingOccurrences(of: " ", with: "%20"))") {
                     cell.loadImageActivityView.isHidden = false
                     cell.loadImageActivityView.startAnimating()
                     self.dataProvider.downloadImage(url: imageURL) { image in
@@ -152,8 +151,8 @@ class ProductListViewController: UIViewController, UITableViewDelegate, UITableV
         searchController.dimsBackgroundDuringPresentation = false
         searchController.searchBar.setValue("Отмена", forKey: "_cancelButtonText")
         searchController.searchBar.placeholder = "Искать..."
-        searchController.hidesNavigationBarDuringPresentation = false
-        //productListTableView.tableHeaderView = searchController.searchBar
+        searchController.hidesNavigationBarDuringPresentation = true
+        productListTableView.tableHeaderView = searchController.searchBar
         definesPresentationContext = true
         searchController.searchBar.barTintColor = #colorLiteral(red: 0.9882352941, green: 0.6470588235, blue: 0.02352941176, alpha: 1)
         searchController.searchBar.tintColor = #colorLiteral(red: 1, green: 1, blue: 1, alpha: 1)
@@ -186,7 +185,7 @@ class ProductListViewController: UIViewController, UITableViewDelegate, UITableV
                 path = "\(slug)/\(path)"
             }
         } while category?.parentId != 0
-        path = globalConstants.moyaPryazhaSite + "component/virtuemart/" + path
+        path = globalSettings.moyaPryazhaSite + "component/virtuemart/" + path
         return path
     }
     

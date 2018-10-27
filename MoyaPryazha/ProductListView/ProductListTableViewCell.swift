@@ -10,7 +10,7 @@ import UIKit
 
 class ProductListTableViewCell: UITableViewCell {
 
-    let globalConstants = GlobalConstants()
+    let globalSettings = GlobalSettings()
     let rootViewController = AppDelegate.shared.rootViewController
     
     @IBOutlet weak var previewImage: UIImageView!
@@ -56,7 +56,7 @@ class ProductListTableViewCell: UITableViewCell {
                 path = "\(slug)/\(path)"
             }
         } while category?.parentId != 0
-        path = globalConstants.moyaPryazhaSite + "component/virtuemart/" + path + "-detail.html?Itemid=0"
+        path = globalSettings.moyaPryazhaSite + "component/virtuemart/" + path + "-detail.html?Itemid=0"
         return path
     }
     

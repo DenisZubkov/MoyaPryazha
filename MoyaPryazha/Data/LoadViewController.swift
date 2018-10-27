@@ -14,7 +14,7 @@ class LoadViewController: UIViewController {
     @IBOutlet weak var loadProgressView: UIProgressView!
     
     var lastModifiedDate = Date()
-    let globalConstants = GlobalConstants()
+    let globalSettings = GlobalSettings()
     let coreDataStack = CoreDataStack()
     var context: NSManagedObjectContext!
     var error = true
@@ -78,7 +78,6 @@ class LoadViewController: UIViewController {
         loadProgressView.setProgress(0.5, animated: true)
         guard let priceTypes = getPriceTypes() else { return true }
         self.priceTypes = priceTypes
-        print(self.priceTypes.count)
         guard let prices = getPrices() else { return true }
         self.prices = prices
         
@@ -166,7 +165,7 @@ class LoadViewController: UIViewController {
     
     func getModifiedDate() -> Date? {
         var currentDate: Date?
-        let urlLastModified = globalConstants.moyaPryazhaSite + globalConstants.moyaPryazhaServicesPath + "srvLastModified.php"
+        let urlLastModified = globalSettings.moyaPryazhaSite + globalSettings.moyaPryazhaServicesPath + "srvLastModified.php"
         if let lastModifiedURL = URL(string: urlLastModified) {
             if let data = getData(url: lastModifiedURL) {
                 let returnData = String(data: data, encoding: .utf8)
@@ -193,7 +192,7 @@ class LoadViewController: UIViewController {
     func getCategories()-> [Category]? {
         context = coreDataStack.persistentContainer.viewContext
         var returnCategories: [Category] = []
-        let urlCategories = globalConstants.moyaPryazhaSite + globalConstants.moyaPryazhaServicesPath + "srvCategories.php"
+        let urlCategories = globalSettings.moyaPryazhaSite + globalSettings.moyaPryazhaServicesPath + "srvCategories.php"
         if let categoriesURL = URL(string: urlCategories) {
             if let data = getData(url: categoriesURL) {
                 let returnData = String(data: data, encoding: .utf8)
@@ -293,7 +292,7 @@ class LoadViewController: UIViewController {
     func getProducts()-> [Product]? {
         context = coreDataStack.persistentContainer.viewContext
         var returnProducts: [Product] = []
-        let urlProducts = globalConstants.moyaPryazhaSite + globalConstants.moyaPryazhaServicesPath + "srvProducts.php"
+        let urlProducts = globalSettings.moyaPryazhaSite + globalSettings.moyaPryazhaServicesPath + "srvProducts.php"
         if let productsURL = URL(string: urlProducts) {
             if let data = getData(url: productsURL) {
                 let returnData = String(data: data, encoding: .utf8)
@@ -396,7 +395,7 @@ class LoadViewController: UIViewController {
     func getCurrencies()-> [Currency]? {
         context = coreDataStack.persistentContainer.viewContext
         var returnCurrencies: [Currency] = []
-        let urlCurrencies = globalConstants.moyaPryazhaSite + globalConstants.moyaPryazhaServicesPath + "srvCurrencies.php"
+        let urlCurrencies = globalSettings.moyaPryazhaSite + globalSettings.moyaPryazhaServicesPath + "srvCurrencies.php"
         if let currenciesURL = URL(string: urlCurrencies) {
             if let data = getData(url: currenciesURL) {
                 let returnData = String(data: data, encoding: .utf8)
@@ -523,7 +522,7 @@ class LoadViewController: UIViewController {
     func getPrices()-> [Price]? {
         context = coreDataStack.persistentContainer.viewContext
         var returnPrices: [Price] = []
-        let urlPrices = globalConstants.moyaPryazhaSite + globalConstants.moyaPryazhaServicesPath + "srvPrices.php"
+        let urlPrices = globalSettings.moyaPryazhaSite + globalSettings.moyaPryazhaServicesPath + "srvPrices.php"
         if let pricesURL = URL(string: urlPrices) {
             if let data = getData(url: pricesURL) {
                 let returnData = String(data: data, encoding: .utf8)
@@ -623,7 +622,7 @@ class LoadViewController: UIViewController {
     func getParameters()-> [Parameter]? {
         context = coreDataStack.persistentContainer.viewContext
         var returnParameters: [Parameter] = []
-        let urlParameters = globalConstants.moyaPryazhaSite + globalConstants.moyaPryazhaServicesPath + "srvParameters.php"
+        let urlParameters = globalSettings.moyaPryazhaSite + globalSettings.moyaPryazhaServicesPath + "srvParameters.php"
         if let parametersURL = URL(string: urlParameters) {
             if let data = getData(url: parametersURL) {
                 let returnData = String(data: data, encoding: .utf8)
@@ -722,7 +721,7 @@ class LoadViewController: UIViewController {
     func getProductParameters()-> [ProductParameter]? {
         context = coreDataStack.persistentContainer.viewContext
         var returnProductParameters: [ProductParameter] = []
-        let urlProductParameters = globalConstants.moyaPryazhaSite + globalConstants.moyaPryazhaServicesPath + "srvProductParameters.php"
+        let urlProductParameters = globalSettings.moyaPryazhaSite + globalSettings.moyaPryazhaServicesPath + "srvProductParameters.php"
         if let productParametersURL = URL(string: urlProductParameters) {
             if let data = getData(url: productParametersURL) {
                 let returnData = String(data: data, encoding: .utf8)
@@ -824,7 +823,7 @@ class LoadViewController: UIViewController {
     func getHits()-> [Hit]? {
         context = coreDataStack.persistentContainer.viewContext
         var returnHits: [Hit] = []
-        let urlHits = globalConstants.moyaPryazhaSite + globalConstants.moyaPryazhaServicesPath + "srvHits.php"
+        let urlHits = globalSettings.moyaPryazhaSite + globalSettings.moyaPryazhaServicesPath + "srvHits.php"
         if let hitsURL = URL(string: urlHits) {
             if let data = getData(url: hitsURL) {
                 let returnData = String(data: data, encoding: .utf8)
@@ -923,7 +922,7 @@ class LoadViewController: UIViewController {
     func getProductPictures()-> [ProductPicture]? {
         context = coreDataStack.persistentContainer.viewContext
         var returnProductPictures: [ProductPicture] = []
-        let urlProductPictures = globalConstants.moyaPryazhaSite + globalConstants.moyaPryazhaServicesPath + "srvProductPictures.php"
+        let urlProductPictures = globalSettings.moyaPryazhaSite + globalSettings.moyaPryazhaServicesPath + "srvProductPictures.php"
         if let productPicturesURL = URL(string: urlProductPictures) {
             if let data = getData(url: productPicturesURL) {
                 let returnData = String(data: data, encoding: .utf8)

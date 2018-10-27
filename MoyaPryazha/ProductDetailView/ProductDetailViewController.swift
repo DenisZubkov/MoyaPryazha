@@ -18,7 +18,7 @@ class ProductDetailViewController: UIViewController, UICollectionViewDataSource,
     }
     
     let dataProvider = DataProvider()
-    let globalConstants = GlobalConstants()
+    let globalSettings = GlobalSettings()
     let rootViewController = AppDelegate.shared.rootViewController
     var currentProduct: Product?
     var viewProductPictures: [ProductPicture] = []
@@ -32,6 +32,8 @@ class ProductDetailViewController: UIViewController, UICollectionViewDataSource,
     @IBOutlet weak var loadImageActivityIndicatorView: UIActivityIndicatorView!
     @IBOutlet weak var productImageCollectionView: UICollectionView!
     @IBOutlet weak var productDetailTableView: UITableView!
+    @IBOutlet weak var siteButton: UIButton!
+    
     
     
     
@@ -43,6 +45,7 @@ class ProductDetailViewController: UIViewController, UICollectionViewDataSource,
         guard let product = currentProduct else { return }
         setProductData(for: product)
         loadMainImage()
+        siteButton.layer.cornerRadius = 15
     }
     
     // MARK: SET VIEW FUNCTIONS
@@ -98,7 +101,7 @@ class ProductDetailViewController: UIViewController, UICollectionViewDataSource,
         if productPicture.image == nil {
             loadImageActivityIndicatorView.isHidden = false
             loadImageActivityIndicatorView.startAnimating()
-            if let url = productPicture.path, let imageURL = URL(string: "\(globalConstants.moyaPryazhaSite)\(url.replacingOccurrences(of: " ", with: "%20"))") {
+            if let url = productPicture.path, let imageURL = URL(string: "\(globalSettings.moyaPryazhaSite)\(url.replacingOccurrences(of: " ", with: "%20"))") {
                 self.dataProvider.downloadImage(url: imageURL) { image in
                     guard let image = image else {
                         self.loadImageActivityIndicatorView.isHidden = true
@@ -134,7 +137,7 @@ class ProductDetailViewController: UIViewController, UICollectionViewDataSource,
         cell.productPreviewActivityIndicatorView.startAnimating()
         let productPicture = viewProductPictures[indexPath.row]
         if productPicture.image == nil {
-            if let url = productPicture.path, let imageURL = URL(string: "\(globalConstants.moyaPryazhaSite)\(url.replacingOccurrences(of: " ", with: "%20"))") {
+            if let url = productPicture.path, let imageURL = URL(string: "\(globalSettings.moyaPryazhaSite)\(url.replacingOccurrences(of: " ", with: "%20"))") {
                 self.dataProvider.downloadImage(url: imageURL) { image in
                     guard let image = image else {
                         cell.productPreviewActivityIndicatorView.isHidden = true
@@ -210,4 +213,32 @@ class ProductDetailViewController: UIViewController, UICollectionViewDataSource,
         self.productImageButton.setImage(image, for: .focused)
     }
 
+    @IBAction func goToSiteButton(_ sender: UIButton) {
+        if let name = currentProduct?.name {
+            if let product = rootViewController.products.filter({$0.name == name}).first {
+                let path = getPathForProduct(product: product) ?? ""
+                guard let url = URL(string: path) else { return }
+                UIApplication.shared.open(url)
+            }
+        }
+    }
+    
+    func getPathForProduct(product:Product) -> String? {
+        var path: String = ""
+        if let slug = product.slug {
+            path = slug
+        }
+        var category = product.category
+        if let slug = category?.slug {
+            path = "\(slug)/\(path)"
+        }
+        repeat {
+            if let slug = category?.slug {
+                category = rootViewController.categories.filter({$0.id == category?.parentId}).first
+                path = "\(slug)/\(path)"
+            }
+        } while category?.parentId != 0
+        path = globalSettings.moyaPryazhaSite + "component/virtuemart/" + path + "-detail.html?Itemid=0"
+        return path
+    }
 }
