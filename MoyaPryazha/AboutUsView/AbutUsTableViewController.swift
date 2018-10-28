@@ -16,6 +16,7 @@ class AbutUsTableViewController: UITableViewController, MFMailComposeViewControl
     let locationManager = CLLocationManager()
     var pointAnnotation: CustomPointAnnotation!
     var pinAnnotationView: MKPinAnnotationView!
+    let titleLabel = UILabel()
  
     @IBOutlet weak var addressLabel: UILabel!
     @IBOutlet weak var mapView: MKMapView!
@@ -25,6 +26,23 @@ class AbutUsTableViewController: UITableViewController, MFMailComposeViewControl
         super.viewDidLoad()
         addressLabel.text = rootViewController.globalSettings.moyaPryazhaAddress
         
+        guard let statusBarView = UIApplication.shared.value(forKeyPath: "statusBarWindow.statusBar") as? UIView else {
+            return
+        }
+        statusBarView.backgroundColor = #colorLiteral(red: 0.4044061303, green: 0.6880503297, blue: 0.001034987159, alpha: 1)
+        
+        tabBarController?.tabBar.tintColor = .white
+        navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
+        navigationController?.navigationBar.shadowImage = UIImage()
+        titleLabel.font = UIFont(name: "AaarghCyrillicBold", size: 17)
+        titleLabel.text = "Интернет-Магазин Моя Пряжа"
+        titleLabel.textColor = UIColor.white
+        titleLabel.adjustsFontSizeToFitWidth = true
+        titleLabel.textAlignment = .center
+        titleLabel.minimumScaleFactor = 0.75 // Минимальный относительный размер шрифта
+        navigationItem.titleView = titleLabel
+        
+        
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.requestAlwaysAuthorization()
@@ -32,7 +50,7 @@ class AbutUsTableViewController: UITableViewController, MFMailComposeViewControl
         
         
         mapView.delegate = self
-        mapView.mapType = .hybrid
+        mapView.mapType = .standard
         mapView.isZoomEnabled = true
         mapView.isScrollEnabled = true
         mapView.showsCompass = true
@@ -44,7 +62,7 @@ class AbutUsTableViewController: UITableViewController, MFMailComposeViewControl
         let gpsY = rootViewController.globalSettings.gpsY
         let location2D = CLLocationCoordinate2D(latitude: gpsX, longitude: gpsY)
         let center = location2D
-        let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: 0.001, longitudeDelta: 0.001))
+        let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: 0.005, longitudeDelta: 0.005))
         mapView.setRegion(region, animated: true)
         pointAnnotation = CustomPointAnnotation()
         pointAnnotation.pinCustomImageName = "tbm"
@@ -53,6 +71,8 @@ class AbutUsTableViewController: UITableViewController, MFMailComposeViewControl
         pointAnnotation.subtitle = "\(rootViewController.globalSettings.moyaPryazhaAddress), Тел: \(rootViewController.globalSettings.moyaPryazhaPhone) Email: \(rootViewController.globalSettings.moyaPryazhaEmail)"
         pinAnnotationView = MKPinAnnotationView(annotation: pointAnnotation, reuseIdentifier: "pin")
         mapView.addAnnotation(pinAnnotationView.annotation!)
+        
+        
         
     }
     
@@ -122,4 +142,8 @@ class AbutUsTableViewController: UITableViewController, MFMailComposeViewControl
         controller.dismiss(animated: true, completion: nil)
     }
 
+    
+//    override var preferredStatusBarStyle: UIStatusBarStyle {
+//        return .lightContent
+//    }
 }

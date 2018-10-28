@@ -41,7 +41,7 @@ class CategoryViewController: UIViewController, UITableViewDataSource, UITableVi
         tabBarController?.tabBar.tintColor = .white
         tabBarController?.tabBar.unselectedItemTintColor = UIColor.black
         tabBarController?.tabBar.items?[1].badgeValue = "\(rootViewController.products.count)"
-        titleLabel.font = UIFont(name: "AaarghCyrillicBold", size: 20)// Нужный шрифт
+        titleLabel.font = UIFont(name: "AaarghCyrillicBold", size: 17)// Нужный шрифт
         titleLabel.text = "Каталог товаров магазина"
         titleLabel.textColor = UIColor.white
         titleLabel.adjustsFontSizeToFitWidth = true

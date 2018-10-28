@@ -138,9 +138,6 @@ class LoadViewController: UIViewController {
                 let cancelAction = UIAlertAction(title: "Ok", style: .default, handler: nil)
                 alertData.addAction(cancelAction)
                 self.present(alertData, animated: true, completion: nil)
-//                DispatchQueue.main.async {
-//                    self.showMessage(title: title, message: message)
-//                }
                 isLoad = true
                 return
             }
