@@ -45,7 +45,7 @@ class AbutUsTableViewController: UITableViewController, MFMailComposeViewControl
         
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        locationManager.requestAlwaysAuthorization()
+        //locationManager.requestAlwaysAuthorization()
         locationManager.startUpdatingLocation()
         
         
@@ -57,7 +57,6 @@ class AbutUsTableViewController: UITableViewController, MFMailComposeViewControl
         mapView.showsBuildings = true
         mapView.showsScale = true
         mapView.showsTraffic = true
-        mapView.showsUserLocation = true
         let gpsX = rootViewController.globalSettings.gpsX
         let gpsY = rootViewController.globalSettings.gpsY
         let location2D = CLLocationCoordinate2D(latitude: gpsX, longitude: gpsY)
@@ -65,10 +64,10 @@ class AbutUsTableViewController: UITableViewController, MFMailComposeViewControl
         let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta: 0.005, longitudeDelta: 0.005))
         mapView.setRegion(region, animated: true)
         pointAnnotation = CustomPointAnnotation()
-        pointAnnotation.pinCustomImageName = "tbm"
+        pointAnnotation.pinCustomImageName = "MPLaunchScreen"
         pointAnnotation.coordinate = location2D
         pointAnnotation.title = "Шоу-рум Моя Пряжа"
-        pointAnnotation.subtitle = "\(rootViewController.globalSettings.moyaPryazhaAddress), Тел: \(rootViewController.globalSettings.moyaPryazhaPhone) Email: \(rootViewController.globalSettings.moyaPryazhaEmail)"
+        //pointAnnotation.subtitle = "\(rootViewController.globalSettings.moyaPryazhaAddress), \n Тел: \(rootViewController.globalSettings.moyaPryazhaPhone) \n Email: \(rootViewController.globalSettings.moyaPryazhaEmail)"
         pinAnnotationView = MKPinAnnotationView(annotation: pointAnnotation, reuseIdentifier: "pin")
         mapView.addAnnotation(pinAnnotationView.annotation!)
         

@@ -11,7 +11,7 @@ import CoreData
 
 class LoadViewController: UIViewController {
 
-    @IBOutlet weak var loadProgressView: UIProgressView!
+    @IBOutlet weak var loadActivity: UIActivityIndicatorView!
     
     var lastModifiedDate = Date()
     let globalSettings = GlobalSettings()
@@ -27,121 +27,191 @@ class LoadViewController: UIViewController {
     var productParameters: [ProductParameter] = []
     var hits: [Hit] = []
     var productPictures: [ProductPicture] = []
+    var resultsCoreData: [ReturnResult] = []
+    var resultsServer: [ReturnData] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
-       
-        //error = loadData()
     }
     
     override func viewDidAppear(_ animated: Bool) {
-        if error {
-            error = loadData()
+        
+        loadActivity.isHidden = false
+        loadActivity.startAnimating()
+        resultsServer = loadDataFromServer()
+        var lastModifiedDateFromServer: Date?
+        let lastModifiedDateFromMemory = UserDefaults.standard.value(forKey: "LastModified") as? Date
+        let dataLastModifiedDate = resultsServer.filter{$0.dataType == .lastModified}
+        if let data = dataLastModifiedDate.first?.data {
+            lastModifiedDateFromServer = parceLastModifiedDate(data: data)
         }
+        if lastModifiedDateFromMemory == nil {
+            parceJSON()
+            UserDefaults.standard.set(lastModifiedDateFromServer, forKey: "LastModified")
+        } else {
+            if let lastModifiedDateFromServer = lastModifiedDateFromServer {
+                if lastModifiedDateFromMemory! < lastModifiedDateFromServer {
+                    parceJSON()
+                    UserDefaults.standard.set(lastModifiedDateFromServer, forKey: "LastModified")
+                } else {
+                    resultsCoreData = loadDataFromCoreData()
+                }
+            } else {
+                resultsCoreData = loadDataFromCoreData()
+            }
+        }
+        for result in resultsCoreData {
+            print("ResultCoreData: \(result.count) \(result.error)")
+        }
+        for result in resultsServer {
+            print("ResultServer: \(result.dataType) \(result.errorType.rawValue) \(result.description) \(result.data?.count ?? -1)")
+        }
+        loadActivity.isHidden = true
+        loadActivity.stopAnimating()
         performSegue(withIdentifier: "ToMainSegue", sender: nil)
     }
     
-    func loadData() -> Bool {
-        
-        if UserDefaults.standard.value(forKey: "LastModified") == nil {
-            UserDefaults.standard.set(lastModifiedDate, forKey: "LastModified")
+    // MARK: LOADMODEL
+    
+    func loadDataFromCoreData() -> [ReturnResult] {
+        var results: [ReturnResult] = []
+        context = coreDataStack.persistentContainer.viewContext
+        results.append(loadCategoriesFromCoreData(context: context))
+        results.append(loadProductsFromCoreData(context: context))
+        results.append(loadCurrenciesFromCoreData(context: context))
+        results.append(loadPriceTypesFromCoreData(context: context))
+        results.append(loadPricesFromCoreData(context: context))
+        results.append(loadParametersFromCoreData(context: context))
+        results.append(loadProductParametersFromCoreData(context: context))
+        results.append(loadHitsFromCoreData(context: context))
+        results.append(loadProductPicturesFromCoreData(context: context))
+        return results
+    }
+    
+    func loadDataFromServer() -> [ReturnData] {
+        var results: [ReturnData] = []
+        for source in globalSettings.modelSources {
+            var result = ReturnData.init(dataType: source.key, errorType: .network, description: "Некорректный URL-адрес", data: nil)
+            let urlSource = globalSettings.moyaPryazhaSite + globalSettings.moyaPryazhaServicesPath + source.value
+            if let url = URL(string: urlSource) {
+                result = getData(url: url, dataType: source.key)
+            }
+            results.append(result)
         }
-        
-        // Date last modify data on server
+        var resultServer = results.filter{($0.data?.count ?? 0 == 0 || $0.errorType != .none)}
+        if resultServer.count > 0 {
+            loadActivity.isHidden = true
+            loadActivity.stopAnimating()
+            let alertData = UIAlertController(title: resultServer.first?.errorType.rawValue, message: "\(resultServer.first?.description ?? "") \n Попробуйте позже", preferredStyle: .alert)
+            let cancelAction = UIAlertAction(title: "Повторить", style: .default)
+            {
+                (action: UIAlertAction) -> Void in
+                self.loadActivity.isHidden = false
+                self.loadActivity.startAnimating()
+                results = self.loadDataFromServer()
+                resultServer = results.filter{($0.data?.count ?? 0 == 0 || $0.errorType != .none)}
+                if resultServer.count == 0 {
+                    self.performSegue(withIdentifier: "ToMainSegue", sender: nil)
+                }
+            }
+            alertData.addAction(cancelAction)
+            self.present(alertData, animated: true, completion: nil)
+        }
 
-        loadProgressView.setProgress(0, animated: true)
-        guard let date = getModifiedDate() else { return true }
-        UserDefaults.standard.set(date, forKey: "LastModified")
-        self.lastModifiedDate = date
+        return results
+    }
+    
+    
+    func parceJSON() {
+        context = coreDataStack.persistentContainer.viewContext
         
-        // Categories array
+        var result = resultsServer.filter{$0.dataType == .category}
+        if let data = result.first?.data {
+            let _ = parceCategories(from: data, to: context)
+        }
+        var loadResult = loadCategoriesFromCoreData(context: context)
+        print("Category CoreData: \(loadResult.count) \(loadResult.error)")
         
-        loadProgressView.setProgress(0.125, animated: true)
-        guard let categories = getCategories() else { return true }
-        self.categories = categories
+        result = resultsServer.filter{$0.dataType == .product}
+        if let data = result.first?.data {
+            let _ = parceProducts(from: data, to: context)
+            
+        }
+        loadResult = loadProductsFromCoreData(context: context)
+        print("Product CoreData: \(loadResult.count) \(loadResult.error)")
         
-        // Products array
+        result = resultsServer.filter{$0.dataType == .currency}
+        if let data = result.first?.data {
+            let _ = parceCurrencies(from: data, to: context)
+        }
+        loadResult = loadCurrenciesFromCoreData(context: context)
+        print("Currency CoreData: \(loadResult.count) \(loadResult.error)")
         
-        loadProgressView.setProgress(0.25, animated: true)
-        guard let products = getProducts() else { return true }
-        self.products = products
+        let _ = parcePriceType(to: context)
+        loadResult = loadPriceTypesFromCoreData(context: context)
+        print("PriceType CoreData: \(loadResult.count) \(loadResult.error)")
         
-        // Currencies array
+        result = resultsServer.filter{$0.dataType == .price}
+        if let data = result.first?.data {
+            let _ = parcePrices(from: data, to: context)
+        }
+        loadResult = loadPricesFromCoreData(context: context)
+        print("Prices CoreData: \(loadResult.count) \(loadResult.error)")
         
-        loadProgressView.setProgress(0.375, animated: true)
-        guard let currencies = getCurrencies() else { return true }
-        self.currencies = currencies
-
+        result = resultsServer.filter{$0.dataType == .parameter}
+        if let data = result.first?.data {
+            let _ = parceParameters(from: data, to: context)
+        }
+        loadResult = loadParametersFromCoreData(context: context)
+        print("Parameters CoreData: \(loadResult.count) \(loadResult.error)")
         
-        // Prices array
+        result = resultsServer.filter{$0.dataType == .productParameter}
+        if let data = result.first?.data {
+            let _ = parceProductParameters(from: data, to: context)
+        }
+        loadResult = loadProductParametersFromCoreData(context: context)
+        print("Product Parameters CoreData: \(loadResult.count) \(loadResult.error)")
         
-        loadProgressView.setProgress(0.5, animated: true)
-        guard let priceTypes = getPriceTypes() else { return true }
-        self.priceTypes = priceTypes
-        guard let prices = getPrices() else { return true }
-        self.prices = prices
+        result = resultsServer.filter{$0.dataType == .hit}
+        if let data = result.first?.data {
+            let _ = parceHits(from: data, to: context)
+        }
+        loadResult = loadHitsFromCoreData(context: context)
+        print("Hits CoreData: \(loadResult.count) \(loadResult.error)")
         
-        
-        // Parameters array
-        
-        
-        loadProgressView.setProgress(0.625, animated: true)
-        guard let parameters = getParameters() else { return true }
-        self.parameters = parameters
-        
-        // Product parameters array
-        
-        loadProgressView.setProgress(0.75, animated: true)
-        guard let productParameters = getProductParameters() else { return true }
-        self.productParameters = productParameters
- 
-        // Hits array
-        
-        loadProgressView.setProgress(0.875, animated: true)
-        guard let hits = getHits() else { return true }
-        self.hits = hits
-
-        // Product pictures array
-        
-        loadProgressView.setProgress(1.0, animated: true)
-        guard let productPictures = getProductPictures() else { return true }
-        self.productPictures = productPictures
-        return false
+        result = resultsServer.filter{$0.dataType == .productPicture}
+        if let data = result.first?.data {
+            let _ = parceProductPictures(from: data, to: context)
+        }
+        loadResult = loadProductPicturesFromCoreData(context: context)
+        print("Product Pictures CoreData: \(loadResult.count) \(loadResult.error)")
         
     }
     
-    func getData(url: URL) -> Data? {
-        let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: 50)
-        var dataLoad: Data?
+    func getData(url: URL, dataType: DataType) -> ReturnData {
+        var returnData = ReturnData.init(dataType: dataType, errorType: .none, description: "", data: nil)
+        let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringLocalCacheData, timeoutInterval: 50)
         var isLoad = false
         let dataTask = URLSession.shared.dataTask(with: request) { data, response, error in
-            var message: String?
-            var title: String?
             if error != nil {
-                message = error?.localizedDescription
-                title = "Ошибка"
+                returnData.description = error?.localizedDescription ?? "Ошибка сервера"
+                returnData.errorType = .network
             } else if data == nil {
-                message = "Не удалось получить данные :("
-                title = "Ошибка данных"
+                returnData.description = "Не удалось получить данные"
+                returnData.errorType = .empty
+            } else if (data?.isEmpty)! {
+                returnData.description = "Данные отсутствуют"
+                returnData.errorType = .empty
             } else if let response = response as? HTTPURLResponse {
                 if response.statusCode != 200 {
-                    message = "\(response.statusCode)  \(HTTPURLResponse.localizedString(forStatusCode: response.statusCode)) "
-                    title = "Ошибка сервера данных \(url)"
+                    returnData.description = "\(response.statusCode)  \(HTTPURLResponse.localizedString(forStatusCode: response.statusCode)) "
+                    returnData.errorType = .network
                 }
             } else {
-                message = "Нет ответа от сервера"
-                title = "Ошибка сервера данных"
+                returnData.description = "Нет ответа от сервера"
+                returnData.errorType = .network
             }
-            if let message = message,
-                let title = title {
-                let alertData = UIAlertController(title: title, message: message, preferredStyle: .alert)
-                let cancelAction = UIAlertAction(title: "Ok", style: .default, handler: nil)
-                alertData.addAction(cancelAction)
-                self.present(alertData, animated: true, completion: nil)
-                isLoad = true
-                return
-            }
-            dataLoad = data
+            returnData.data = data
             isLoad = true
         }
         dataTask.resume()
@@ -149,7 +219,7 @@ class LoadViewController: UIViewController {
         }
         while isLoad != true {
         }
-        return dataLoad
+        return returnData
     }
     
     
@@ -160,81 +230,75 @@ class LoadViewController: UIViewController {
         present(alertData, animated: true, completion: nil)
     }
     
-    func getModifiedDate() -> Date? {
-        var currentDate: Date?
-        let urlLastModified = globalSettings.moyaPryazhaSite + globalSettings.moyaPryazhaServicesPath + "srvLastModified.php"
-        if let lastModifiedURL = URL(string: urlLastModified) {
-            if let data = getData(url: lastModifiedURL) {
-                let returnData = String(data: data, encoding: .utf8)
-                let inputJSON = returnData?.data(using: .utf8)
-                let decoder = JSONDecoder()
-                decoder.dateDecodingStrategy = .iso8601
-                do {
-                    let lastModifieds = try JSONDecoder().decode([LastModified].self, from: inputJSON!)
-                    let dateformatter = DateFormatter()
-                    dateformatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-                    if let date = lastModifieds.first?.modifyDate {
-                        currentDate = dateformatter.date(from: date)
-                    }
-                } catch let jsonError {
-                    print("Error", jsonError)
-                }
-            }
-        }
-        return currentDate
+    func repeatMessage(title: String, message: String) {
+        let alertData = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let cancelAction = UIAlertAction(title: "Повторить", style: .default, handler: nil)
+        alertData.addAction(cancelAction)
+        present(alertData, animated: true, completion: nil)
     }
+    
+    // MARK: MODIFIEDDATE
+    
+    func parceLastModifiedDate( data: Data) -> Date? {
+        let dateformatter = DateFormatter()
+        dateformatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        do {
+            let lastModifieds = try JSONDecoder().decode([LastModified].self, from: data)
+            if let date = lastModifieds.first?.modifyDate {
+                let currentDate = dateformatter.date(from: date)
+                return currentDate
+            }
+        } catch {
+        }
+        return nil
+        
+    }
+    
+    
+    
     
     // MARK: CATEGORIES
     
-    func getCategories()-> [Category]? {
-        context = coreDataStack.persistentContainer.viewContext
-        var returnCategories: [Category] = []
-        let urlCategories = globalSettings.moyaPryazhaSite + globalSettings.moyaPryazhaServicesPath + "srvCategories.php"
-        if let categoriesURL = URL(string: urlCategories) {
-            if let data = getData(url: categoriesURL) {
-                let returnData = String(data: data, encoding: .utf8)
-                let inputJSON = returnData?.data(using: .utf8)
-                let decoder = JSONDecoder()
-                decoder.dateDecodingStrategy = .iso8601
-                do {
-                    let categories = try JSONDecoder().decode([CategoryJSON].self, from: inputJSON!)
-                    if categories.count != 0 {
-                        let deletedCategories = deleteCategoriesFromCoreData(context: self.context)
-                        if deletedCategories.count == -1 {
-                            DispatchQueue.main.async {
-                                self.showMessage(title: "Ошибка", message: deletedCategories.error)
-                            }
-                            return nil
-                        }
-                        let addedCategories = addCategoriesToCoreData(categories: categories, context: self.context)
-                        if addedCategories.count == -1 {
-                            DispatchQueue.main.async {
-                                self.showMessage(title: "Ошибка", message: addedCategories.error)
-                            }
-                            return nil
-                        }
-                    }
-                } catch let jsonError {
-                    DispatchQueue.main.async {
-                        self.showMessage(title: "Ошибка", message: jsonError.localizedDescription)
-                    }
-                    return nil
+    func parceCategories(from data: Data, to context: NSManagedObjectContext) -> ReturnResult {
+        var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
+        let returnData = String(data: data, encoding: .utf8)
+        let inputJSON = returnData?.data(using: .utf8)
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        do {
+            let categories = try JSONDecoder().decode([CategoryJSON].self, from: inputJSON!)
+            if categories.count != 0 {
+                returnResult = deleteCategoriesFromCoreData(context: context)
+                if returnResult.count == -1 {
+                    return returnResult
+                }
+                returnResult = addCategoriesToCoreData(categories: categories, context: context)
+                if returnResult.count == -1 {
+                    return returnResult
                 }
             }
-        }
-        let fetchRequest: NSFetchRequest<Category> = Category.fetchRequest()
-        do {
-            let results = try context.fetch(fetchRequest)
-            returnCategories = results
         } catch let error as NSError {
-            DispatchQueue.main.async {
-                self.showMessage(title: "Ошибка", message: error.localizedDescription)
-            }
+            returnResult.error = "Ошибка JSON категорий: \(error.localizedDescription)"
+            returnResult.count = -1
         }
-        return returnCategories
+        return returnResult
     }
     
-    func deleteCategoriesFromCoreData(context: NSManagedObjectContext) -> ReturnResult{
+    func loadCategoriesFromCoreData(context: NSManagedObjectContext) -> ReturnResult {
+        var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
+        let fetchRequest: NSFetchRequest<Category> = Category.fetchRequest()
+        // извлекаем из контекста
+        do {
+            categories = try context.fetch(fetchRequest)
+            returnResult.count = categories.count
+        } catch let error as NSError {
+            returnResult.error = "Ошибка извлечения категорий: \(error.localizedDescription)"
+            returnResult.count = -1
+        }
+        return returnResult
+    }
+    
+    func deleteCategoriesFromCoreData(context: NSManagedObjectContext) -> ReturnResult {
         var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
         let fetchRequest: NSFetchRequest<Category> = Category.fetchRequest()
         // извлекаем из контекста
@@ -242,26 +306,26 @@ class LoadViewController: UIViewController {
             let results = try context.fetch(fetchRequest)
             for result in results {
                 returnResult.count += 1
-                self.context.delete(result)
+                context.delete(result)
             }
         } catch let error as NSError {
-            returnResult.error = "Ошибка удаления категорий товаров: \(error.localizedDescription)"
+            returnResult.error = "Ошибка удаления категорий: \(error.localizedDescription)"
             returnResult.count = -1
         }
         do {
-            try self.context.save()
+            try context.save()
         } catch let error as NSError {
-            returnResult.error = "Ошибка сохранения удаления категорий товаров: \(error.localizedDescription)"
+            returnResult.error = "Ошибка сохранения удаления категорий: \(error.localizedDescription)"
             returnResult.count = -1
             print(returnResult.error)}
         return returnResult
     }
     
-    func addCategoriesToCoreData(categories: [CategoryJSON], context: NSManagedObjectContext) -> ReturnResult{
+    func addCategoriesToCoreData(categories: [CategoryJSON], context: NSManagedObjectContext) -> ReturnResult {
         var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
         var categoryCurrent: Category!
         for category in categories {
-            categoryCurrent = Category(context: self.context)
+            categoryCurrent = Category(context: context)
             // присваиваем переданные свойства
             categoryCurrent.id = Int32(category.id) ?? 0
             var categoryName: String? = category.name
@@ -276,9 +340,9 @@ class LoadViewController: UIViewController {
             
         }
         do {
-            try self.context.save()
+            try context.save()
         } catch let error as NSError {
-            returnResult.error = "Ошибка сохранения категорий товаров: \(error.localizedDescription)"
+            returnResult.error = "Ошибка сохранения категорий: \(error.localizedDescription)"
             returnResult.count = -1
             print(returnResult.error)}
         return returnResult
@@ -286,53 +350,43 @@ class LoadViewController: UIViewController {
     
     // MARK: PRODUCTS
     
-    func getProducts()-> [Product]? {
-        context = coreDataStack.persistentContainer.viewContext
-        var returnProducts: [Product] = []
-        let urlProducts = globalSettings.moyaPryazhaSite + globalSettings.moyaPryazhaServicesPath + "srvProducts.php"
-        if let productsURL = URL(string: urlProducts) {
-            if let data = getData(url: productsURL) {
-                let returnData = String(data: data, encoding: .utf8)
-                let inputJSON = returnData?.data(using: .utf8)
-                let decoder = JSONDecoder()
-                decoder.dateDecodingStrategy = .iso8601
-                do {
-                    let products = try JSONDecoder().decode([ProductJSON].self, from: inputJSON!)
-                    if products.count != 0 {
-                        let deletedProducts = deleteProductsFromCoreData(context: self.context)
-                        if deletedProducts.count == -1 {
-                            DispatchQueue.main.async {
-                                self.showMessage(title: "Ошибка", message: deletedProducts.error)
-                            }
-                            return nil
-                        }
-                        let addedProducts = addProductsToCoreData(products: products, context: self.context)
-                        if addedProducts.count == -1 {
-                            DispatchQueue.main.async {
-                                self.showMessage(title: "Ошибка", message: addedProducts.error)
-                            }
-                            return nil
-                        }
-                    }
-                } catch let jsonError {
-                    DispatchQueue.main.async {
-                        self.showMessage(title: "Ошибка", message: jsonError.localizedDescription)
-                    }
-                    print(jsonError)
-                    return nil
+    func parceProducts(from data: Data, to context: NSManagedObjectContext) -> ReturnResult {
+        var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
+        let returnData = String(data: data, encoding: .utf8)
+        let inputJSON = returnData?.data(using: .utf8)
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        do {
+            let products = try JSONDecoder().decode([ProductJSON].self, from: inputJSON!)
+            if products.count != 0 {
+                returnResult = deleteProductsFromCoreData(context: context)
+                if returnResult.count == -1 {
+                    return returnResult
+                }
+                returnResult = addProductsToCoreData(products: products, context: context)
+                if returnResult.count == -1 {
+                    return returnResult
                 }
             }
-        }
-        let fetchRequest: NSFetchRequest<Product> = Product.fetchRequest()
-        do {
-            let results = try context.fetch(fetchRequest)
-            returnProducts = results
         } catch let error as NSError {
-            DispatchQueue.main.async {
-                self.showMessage(title: "Ошибка", message: error.localizedDescription)
-            }
+            returnResult.error = "Ошибка JSON товаров: \(error.localizedDescription)"
+            returnResult.count = -1
         }
-        return returnProducts
+        return returnResult
+    }
+    
+    func loadProductsFromCoreData(context: NSManagedObjectContext) -> ReturnResult{
+        var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
+        let fetchRequest: NSFetchRequest<Product> = Product.fetchRequest()
+        // извлекаем из контекста
+        do {
+            products = try context.fetch(fetchRequest)
+            returnResult.count = products.count
+        } catch let error as NSError {
+            returnResult.error = "Ошибка извлечения товаров: \(error.localizedDescription)"
+            returnResult.count = -1
+        }
+        return returnResult
     }
     
     func deleteProductsFromCoreData(context: NSManagedObjectContext) -> ReturnResult{
@@ -343,17 +397,17 @@ class LoadViewController: UIViewController {
             let results = try context.fetch(fetchRequest)
             for result in results {
                 returnResult.count += 1
-                self.context.delete(result)
+                context.delete(result)
             }
         } catch let error as NSError {
-            returnResult.error = "Ошибка удаления категорий товаров: \(error.localizedDescription)"
+            returnResult.error = "Ошибка удаления товаров: \(error.localizedDescription)"
             returnResult.count = -1
             print(returnResult.error)
 }
         do {
-            try self.context.save()
+            try context.save()
         } catch let error as NSError {
-            returnResult.error = "Ошибка сохранения удаления категорий товаров: \(error.localizedDescription)"
+            returnResult.error = "Ошибка сохранения удаления товаров: \(error.localizedDescription)"
             returnResult.count = -1
             print(returnResult.error)
         }
@@ -364,7 +418,7 @@ class LoadViewController: UIViewController {
         var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
         var productCurrent: Product!
         for product in products {
-            productCurrent = Product(context: self.context)
+            productCurrent = Product(context: context)
             // присваиваем переданные свойства
             productCurrent.id = Int32(product.id) ?? 0
             productCurrent.slug = product.slug
@@ -377,9 +431,9 @@ class LoadViewController: UIViewController {
             
         }
         do {
-            try self.context.save()
+            try context.save()
         } catch let error as NSError {
-            returnResult.error = "Ошибка сохранения категорий товаров: \(error.localizedDescription)"
+            returnResult.error = "Ошибка сохранения товаров: \(error.localizedDescription)"
             returnResult.count = -1
             print(returnResult.error)
         }
@@ -389,53 +443,44 @@ class LoadViewController: UIViewController {
     
     // MARK: CURRENCY
     
-    func getCurrencies()-> [Currency]? {
-        context = coreDataStack.persistentContainer.viewContext
-        var returnCurrencies: [Currency] = []
-        let urlCurrencies = globalSettings.moyaPryazhaSite + globalSettings.moyaPryazhaServicesPath + "srvCurrencies.php"
-        if let currenciesURL = URL(string: urlCurrencies) {
-            if let data = getData(url: currenciesURL) {
-                let returnData = String(data: data, encoding: .utf8)
-                let inputJSON = returnData?.data(using: .utf8)
-                let decoder = JSONDecoder()
-                decoder.dateDecodingStrategy = .iso8601
-                do {
-                    let currencies = try JSONDecoder().decode([CurrencyJSON].self, from: inputJSON!)
-                    if currencies.count != 0 {
-                        let deletedCurrencies = deleteCurrenciesFromCoreData(context: self.context)
-                        if deletedCurrencies.count == -1 {
-                            DispatchQueue.main.async {
-                                self.showMessage(title: "Ошибка", message: deletedCurrencies.error)
-                            }
-                            return nil
-                        }
-                        let addedCurrencies = addCurrenciesToCoreData(currencies: currencies, context: self.context)
-                        if addedCurrencies.count == -1 {
-                            DispatchQueue.main.async {
-                                self.showMessage(title: "Ошибка", message: addedCurrencies.error)
-                            }
-                            return nil
-                        }
-                    }
-                } catch let jsonError {
-                    DispatchQueue.main.async {
-                        self.showMessage(title: "Ошибка", message: jsonError.localizedDescription)
-                    }
-                    print(jsonError)
-                    return nil
+    func parceCurrencies(from data: Data, to context: NSManagedObjectContext) -> ReturnResult {
+        var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
+        let returnData = String(data: data, encoding: .utf8)
+        let inputJSON = returnData?.data(using: .utf8)
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        do {
+            let currencies = try JSONDecoder().decode([CurrencyJSON].self, from: inputJSON!)
+            if currencies.count != 0 {
+                returnResult = deleteCurrenciesFromCoreData(context: context)
+                if returnResult.count == -1 {
+                    return returnResult
+                }
+                returnResult = addCurrenciesToCoreData(currencies: currencies, context: context)
+                if returnResult.count == -1 {
+                    return returnResult
                 }
             }
-        }
-        let fetchRequest: NSFetchRequest<Currency> = Currency.fetchRequest()
-        do {
-            let results = try context.fetch(fetchRequest)
-            returnCurrencies = results
         } catch let error as NSError {
-            DispatchQueue.main.async {
-                self.showMessage(title: "Ошибка", message: error.localizedDescription)
-            }
+            returnResult.error = "Ошибка JSON товаров: \(error.localizedDescription)"
+            returnResult.count = -1
         }
-        return returnCurrencies
+        return returnResult
+    }
+
+    
+    func loadCurrenciesFromCoreData(context: NSManagedObjectContext) -> ReturnResult{
+        var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
+        let fetchRequest: NSFetchRequest<Currency> = Currency.fetchRequest()
+        // извлекаем из контекста
+        do {
+            currencies = try context.fetch(fetchRequest)
+            returnResult.count = currencies.count
+        } catch let error as NSError {
+            returnResult.error = "Ошибка извлечения валют: \(error.localizedDescription)"
+            returnResult.count = -1
+        }
+        return returnResult
     }
     
     func deleteCurrenciesFromCoreData(context: NSManagedObjectContext) -> ReturnResult{
@@ -446,17 +491,17 @@ class LoadViewController: UIViewController {
             let results = try context.fetch(fetchRequest)
             for result in results {
                 returnResult.count += 1
-                self.context.delete(result)
+                context.delete(result)
             }
         } catch let error as NSError {
-            returnResult.error = "Ошибка удаления категорий товаров: \(error.localizedDescription)"
+            returnResult.error = "Ошибка удаления валют: \(error.localizedDescription)"
             returnResult.count = -1
             print(returnResult.error)
         }
         do {
-            try self.context.save()
+            try context.save()
         } catch let error as NSError {
-            returnResult.error = "Ошибка сохранения удаления категорий товаров: \(error.localizedDescription)"
+            returnResult.error = "Ошибка сохранения удаления валют: \(error.localizedDescription)"
             returnResult.count = -1
             print(returnResult.error)
         }
@@ -467,7 +512,7 @@ class LoadViewController: UIViewController {
         var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
         var currencyCurrent: Currency!
         for currency in currencies {
-            currencyCurrent = Currency(context: self.context)
+            currencyCurrent = Currency(context: context)
             // присваиваем переданные свойства
             currencyCurrent.id = Int32(currency.id) ?? 0
             currencyCurrent.name = currency.name
@@ -477,9 +522,9 @@ class LoadViewController: UIViewController {
             
         }
         do {
-            try self.context.save()
+            try context.save()
         } catch let error as NSError {
-            returnResult.error = "Ошибка сохранения категорий товаров: \(error.localizedDescription)"
+            returnResult.error = "Ошибка сохранения валют: \(error.localizedDescription)"
             returnResult.count = -1
             print(returnResult.error)
         }
@@ -488,83 +533,88 @@ class LoadViewController: UIViewController {
     
     // MARK: PRICETYPE
     
-    func getPriceTypes()-> [PriceType]? {
-        context = coreDataStack.persistentContainer.viewContext
-        var returnPriceTypes: [PriceType] = []
+    func parcePriceType(to context: NSManagedObjectContext) -> ReturnResult {
+        var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
         let fetchRequest: NSFetchRequest<PriceType> = PriceType.fetchRequest()
         do {
             let results = try context.fetch(fetchRequest)
-            returnPriceTypes = results
+            priceTypes = results
         } catch let error as NSError {
-            DispatchQueue.main.async {
-                self.showMessage(title: "Ошибка", message: error.localizedDescription)
-            }
+            returnResult.error = "Ошибка извлечения типа цены: \(error.localizedDescription)"
+            returnResult.count = -1
         }
-        if returnPriceTypes.count == 0 {
-            returnPriceTypes.append(PriceType(context: self.context))
-            returnPriceTypes.first?.id = Int32("1") ?? 1
-            returnPriceTypes.first?.name = "Основной"
+        if priceTypes.count == 0 {
+            priceTypes.append(PriceType(context: context))
+            priceTypes.first?.id = Int32("1") ?? 1
+            priceTypes.first?.name = "Основной"
         }
         do {
-            try self.context.save()
+            try context.save()
         } catch let error as NSError {
-            print(error.description)
+            returnResult.error = "Ошибка сохранения типа цены: \(error.localizedDescription)"
+            returnResult.count = -1
         }
-        return returnPriceTypes
+        return returnResult
+    }
+    
+    func loadPriceTypesFromCoreData(context: NSManagedObjectContext) -> ReturnResult{
+        var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
+        let fetchRequest: NSFetchRequest<PriceType> = PriceType.fetchRequest()
+        // извлекаем из контекста
+        do {
+            priceTypes = try context.fetch(fetchRequest)
+            returnResult.count = priceTypes.count
+        } catch let error as NSError {
+            returnResult.error = "Ошибка извлечения типа цен: \(error.localizedDescription)"
+            returnResult.count = -1
+        }
+        return returnResult
     }
     
    
     // MARK: PRICE
 
-    func getPrices()-> [Price]? {
-        context = coreDataStack.persistentContainer.viewContext
-        var returnPrices: [Price] = []
-        let urlPrices = globalSettings.moyaPryazhaSite + globalSettings.moyaPryazhaServicesPath + "srvPrices.php"
-        if let pricesURL = URL(string: urlPrices) {
-            if let data = getData(url: pricesURL) {
-                let returnData = String(data: data, encoding: .utf8)
-                let inputJSON = returnData?.data(using: .utf8)
-                let decoder = JSONDecoder()
-                decoder.dateDecodingStrategy = .iso8601
-                do {
-                    let prices = try JSONDecoder().decode([PriceJSON].self, from: inputJSON!)
-                    if prices.count != 0 {
-                        let deletedPrices = deletePricesFromCoreData(context: self.context)
-                        if deletedPrices.count == -1 {
-                            DispatchQueue.main.async {
-                                self.showMessage(title: "Ошибка", message: deletedPrices.error)
-                            }
-                            return nil
-                        }
-                        let addedPrices = addPricesToCoreData(prices: prices, context: self.context)
-                        if addedPrices.count == -1 {
-                            DispatchQueue.main.async {
-                                self.showMessage(title: "Ошибка", message: addedPrices.error)
-                            }
-                            return nil
-                        }
-                    }
-                } catch let jsonError {
-                    DispatchQueue.main.async {
-                        self.showMessage(title: "Ошибка", message: jsonError.localizedDescription)
-                    }
-                    print(jsonError)
-                    return nil
+    
+    func parcePrices(from data: Data, to context: NSManagedObjectContext) -> ReturnResult {
+        var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
+        let returnData = String(data: data, encoding: .utf8)
+        let inputJSON = returnData?.data(using: .utf8)
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        do {
+            let prices = try JSONDecoder().decode([PriceJSON].self, from: inputJSON!)
+            if prices.count != 0 {
+                returnResult = deletePricesFromCoreData(context: context)
+                if returnResult.count == -1 {
+                    return returnResult
+                }
+                returnResult = addPricesToCoreData(prices: prices, context: context)
+                if returnResult.count == -1 {
+                    return returnResult
                 }
             }
-        }
-        let fetchRequest: NSFetchRequest<Price> = Price.fetchRequest()
-        do {
-            let results = try context.fetch(fetchRequest)
-            returnPrices = results
         } catch let error as NSError {
-            DispatchQueue.main.async {
-                self.showMessage(title: "Ошибка", message: error.localizedDescription)
-            }
+            returnResult.error = "Ошибка JSON цен: \(error.localizedDescription)"
+            returnResult.count = -1
         }
-        return returnPrices
+        return returnResult
     }
-
+    
+    
+    func loadPricesFromCoreData(context: NSManagedObjectContext) -> ReturnResult{
+        var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
+        let fetchRequest: NSFetchRequest<Price> = Price.fetchRequest()
+        // извлекаем из контекста
+        do {
+            prices = try context.fetch(fetchRequest)
+            returnResult.count = prices.count
+        } catch let error as NSError {
+            returnResult.error = "Ошибка извлечения цен: \(error.localizedDescription)"
+            returnResult.count = -1
+        }
+        return returnResult
+    }
+    
     func deletePricesFromCoreData(context: NSManagedObjectContext) -> ReturnResult{
         var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
         let fetchRequest: NSFetchRequest<Price> = Price.fetchRequest()
@@ -573,17 +623,17 @@ class LoadViewController: UIViewController {
             let results = try context.fetch(fetchRequest)
             for result in results {
                 returnResult.count += 1
-                self.context.delete(result)
+                context.delete(result)
             }
         } catch let error as NSError {
-            returnResult.error = "Ошибка удаления категорий товаров: \(error.localizedDescription)"
+            returnResult.error = "Ошибка удаления цен: \(error.localizedDescription)"
             returnResult.count = -1
             print(returnResult.error)
         }
         do {
-            try self.context.save()
+            try context.save()
         } catch let error as NSError {
-            returnResult.error = "Ошибка сохранения удаления категорий товаров: \(error.localizedDescription)"
+            returnResult.error = "Ошибка сохранения удаления цен: \(error.localizedDescription)"
             returnResult.count = -1
             print(returnResult.error)
         }
@@ -594,7 +644,7 @@ class LoadViewController: UIViewController {
         var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
         var priceCurrent: Price!
         for price in prices {
-            priceCurrent = Price(context: self.context)
+            priceCurrent = Price(context: context)
             // присваиваем переданные свойства
             priceCurrent.id = Int32(price.id) ?? 0
             priceCurrent.price = Float(price.price) ?? 0
@@ -605,9 +655,9 @@ class LoadViewController: UIViewController {
 
         }
         do {
-            try self.context.save()
+            try context.save()
         } catch let error as NSError {
-            returnResult.error = "Ошибка сохранения категорий товаров: \(error.localizedDescription)"
+            returnResult.error = "Ошибка сохранения цен: \(error.localizedDescription)"
             returnResult.count = -1
             print(returnResult.error)
         }
@@ -616,55 +666,46 @@ class LoadViewController: UIViewController {
     
     // MARK: PARAMETER
 
-    func getParameters()-> [Parameter]? {
-        context = coreDataStack.persistentContainer.viewContext
-        var returnParameters: [Parameter] = []
-        let urlParameters = globalSettings.moyaPryazhaSite + globalSettings.moyaPryazhaServicesPath + "srvParameters.php"
-        if let parametersURL = URL(string: urlParameters) {
-            if let data = getData(url: parametersURL) {
-                let returnData = String(data: data, encoding: .utf8)
-                let inputJSON = returnData?.data(using: .utf8)
-                let decoder = JSONDecoder()
-                decoder.dateDecodingStrategy = .iso8601
-                do {
-                    let parameters = try JSONDecoder().decode([ParameterJSON].self, from: inputJSON!)
-                    if parameters.count != 0 {
-                        let deletedParameters = deleteParametersFromCoreData(context: self.context)
-                        if deletedParameters.count == -1 {
-                            DispatchQueue.main.async {
-                                self.showMessage(title: "Ошибка", message: deletedParameters.error)
-                            }
-                            return nil
-                        }
-                        let addedParameters = addParametersToCoreData(parameters: parameters, context: self.context)
-                        if addedParameters.count == -1 {
-                            DispatchQueue.main.async {
-                                self.showMessage(title: "Ошибка", message: addedParameters.error)
-                            }
-                            return nil
-                        }
-                    }
-                } catch let jsonError {
-                    DispatchQueue.main.async {
-                        self.showMessage(title: "Ошибка", message: jsonError.localizedDescription)
-                    }
-                    print(jsonError)
-                    return nil
+    func parceParameters(from data: Data, to context: NSManagedObjectContext) -> ReturnResult {
+        var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
+        let returnData = String(data: data, encoding: .utf8)
+        let inputJSON = returnData?.data(using: .utf8)
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        do {
+            let parameters = try JSONDecoder().decode([ParameterJSON].self, from: inputJSON!)
+            if parameters.count != 0 {
+                returnResult = deleteParametersFromCoreData(context: context)
+                if returnResult.count == -1 {
+                    return returnResult
+                }
+                returnResult = addParametersToCoreData(parameters: parameters, context: context)
+                if returnResult.count == -1 {
+                    return returnResult
                 }
             }
-        }
-        let fetchRequest: NSFetchRequest<Parameter> = Parameter.fetchRequest()
-        do {
-            let results = try context.fetch(fetchRequest)
-            returnParameters = results
         } catch let error as NSError {
-            DispatchQueue.main.async {
-                self.showMessage(title: "Ошибка", message: error.localizedDescription)
-            }
+            returnResult.error = "Ошибка JSON параметров: \(error.localizedDescription)"
+            returnResult.count = -1
         }
-        return returnParameters
+        return returnResult
     }
 
+    func loadParametersFromCoreData(context: NSManagedObjectContext) -> ReturnResult{
+        var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
+        let fetchRequest: NSFetchRequest<Parameter> = Parameter.fetchRequest()
+        // извлекаем из контекста
+        do {
+            parameters = try context.fetch(fetchRequest)
+            returnResult.count = parameters.count
+        } catch let error as NSError {
+            returnResult.error = "Ошибка извлечения категорий товаров: \(error.localizedDescription)"
+            returnResult.count = -1
+        }
+        return returnResult
+    }
+    
+    
     func deleteParametersFromCoreData(context: NSManagedObjectContext) -> ReturnResult{
         var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
         let fetchRequest: NSFetchRequest<Parameter> = Parameter.fetchRequest()
@@ -673,7 +714,7 @@ class LoadViewController: UIViewController {
             let results = try context.fetch(fetchRequest)
             for result in results {
                 returnResult.count += 1
-                self.context.delete(result)
+                context.delete(result)
             }
         } catch let error as NSError {
             returnResult.error = "Ошибка удаления категорий товаров: \(error.localizedDescription)"
@@ -681,7 +722,7 @@ class LoadViewController: UIViewController {
             print(returnResult.error)
         }
         do {
-            try self.context.save()
+            try context.save()
         } catch let error as NSError {
             returnResult.error = "Ошибка сохранения удаления категорий товаров: \(error.localizedDescription)"
             returnResult.count = -1
@@ -694,7 +735,7 @@ class LoadViewController: UIViewController {
         var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
         var parameterCurrent: Parameter!
         for parameter in parameters {
-            parameterCurrent = Parameter(context: self.context)
+            parameterCurrent = Parameter(context: context)
             // присваиваем переданные свойства
             parameterCurrent.id = Int32(parameter.id) ?? 0
             parameterCurrent.name = parameter.title
@@ -704,7 +745,7 @@ class LoadViewController: UIViewController {
 
         }
         do {
-            try self.context.save()
+            try context.save()
         } catch let error as NSError {
             returnResult.error = "Ошибка сохранения категорий товаров: \(error.localizedDescription)"
             returnResult.count = -1
@@ -715,53 +756,43 @@ class LoadViewController: UIViewController {
     
     // MARK: PRODUCTPARAMETER
 
-    func getProductParameters()-> [ProductParameter]? {
-        context = coreDataStack.persistentContainer.viewContext
-        var returnProductParameters: [ProductParameter] = []
-        let urlProductParameters = globalSettings.moyaPryazhaSite + globalSettings.moyaPryazhaServicesPath + "srvProductParameters.php"
-        if let productParametersURL = URL(string: urlProductParameters) {
-            if let data = getData(url: productParametersURL) {
-                let returnData = String(data: data, encoding: .utf8)
-                let inputJSON = returnData?.data(using: .utf8)
-                let decoder = JSONDecoder()
-                decoder.dateDecodingStrategy = .iso8601
-                do {
-                    let productParameters = try JSONDecoder().decode([ProductParameterJSON].self, from: inputJSON!)
-                    if productParameters.count != 0 {
-                        let deletedProductParameters = deleteProductParametersFromCoreData(context: self.context)
-                        if deletedProductParameters.count == -1 {
-                            DispatchQueue.main.async {
-                                self.showMessage(title: "Ошибка", message: deletedProductParameters.error)
-                            }
-                            return nil
-                        }
-                        let addedProductParameters = addProductParametersToCoreData(productParameters: productParameters, context: self.context)
-                        if addedProductParameters.count == -1 {
-                            DispatchQueue.main.async {
-                                self.showMessage(title: "Ошибка", message: addedProductParameters.error)
-                            }
-                            return nil
-                        }
-                    }
-                } catch let jsonError {
-                    DispatchQueue.main.async {
-                        self.showMessage(title: "Ошибка", message: jsonError.localizedDescription)
-                    }
-                    print(jsonError)
-                    return nil
+    func parceProductParameters(from data: Data, to context: NSManagedObjectContext) -> ReturnResult {
+        var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
+        let returnData = String(data: data, encoding: .utf8)
+        let inputJSON = returnData?.data(using: .utf8)
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        do {
+            let productParameters = try JSONDecoder().decode([ProductParameterJSON].self, from: inputJSON!)
+            if productParameters.count != 0 {
+                returnResult = deleteProductParametersFromCoreData(context: context)
+                if returnResult.count == -1 {
+                    return returnResult
+                }
+                returnResult = addProductParametersToCoreData(productParameters: productParameters, context: context)
+                if returnResult.count == -1 {
+                    return returnResult
                 }
             }
-        }
-        let fetchRequest: NSFetchRequest<ProductParameter> = ProductParameter.fetchRequest()
-        do {
-            let results = try context.fetch(fetchRequest)
-            returnProductParameters = results
         } catch let error as NSError {
-            DispatchQueue.main.async {
-                self.showMessage(title: "Ошибка", message: error.localizedDescription)
-            }
+            returnResult.error = "Ошибка JSON параметров товвров: \(error.localizedDescription)"
+            returnResult.count = -1
         }
-        return returnProductParameters
+        return returnResult
+    }
+    
+    func loadProductParametersFromCoreData(context: NSManagedObjectContext) -> ReturnResult{
+        var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
+        let fetchRequest: NSFetchRequest<ProductParameter> = ProductParameter.fetchRequest()
+        // извлекаем из контекста
+        do {
+            productParameters = try context.fetch(fetchRequest)
+            returnResult.count = productParameters.count
+        } catch let error as NSError {
+            returnResult.error = "Ошибка извлечения параметров товаров: \(error.localizedDescription)"
+            returnResult.count = -1
+        }
+        return returnResult
     }
 
     func deleteProductParametersFromCoreData(context: NSManagedObjectContext) -> ReturnResult{
@@ -772,17 +803,17 @@ class LoadViewController: UIViewController {
             let results = try context.fetch(fetchRequest)
             for result in results {
                 returnResult.count += 1
-                self.context.delete(result)
+                context.delete(result)
             }
         } catch let error as NSError {
-            returnResult.error = "Ошибка удаления категорий товаров: \(error.localizedDescription)"
+            returnResult.error = "Ошибка удаления параметров товаров: \(error.localizedDescription)"
             returnResult.count = -1
             print(returnResult.error)
         }
         do {
-            try self.context.save()
+            try context.save()
         } catch let error as NSError {
-            returnResult.error = "Ошибка сохранения удаления категорий товаров: \(error.localizedDescription)"
+            returnResult.error = "Ошибка сохранения удаления параметров товаров: \(error.localizedDescription)"
             returnResult.count = -1
             print(returnResult.error)
         }
@@ -793,7 +824,7 @@ class LoadViewController: UIViewController {
         var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
         var productParameterCurrent: ProductParameter!
         for productParameter in productParameters {
-            productParameterCurrent = ProductParameter(context: self.context)
+            productParameterCurrent = ProductParameter(context: context)
             // присваиваем переданные свойства
             productParameterCurrent.id = Int32(productParameter.id) ?? 0
             productParameterCurrent.value = productParameter.value
@@ -806,9 +837,9 @@ class LoadViewController: UIViewController {
 
         }
         do {
-            try self.context.save()
+            try context.save()
         } catch let error as NSError {
-            returnResult.error = "Ошибка сохранения категорий товаров: \(error.localizedDescription)"
+            returnResult.error = "Ошибка сохранения параметров товаров: \(error.localizedDescription)"
             returnResult.count = -1
             print(returnResult.error)
         }
@@ -817,55 +848,46 @@ class LoadViewController: UIViewController {
     
     // MARK: HIT
 
-    func getHits()-> [Hit]? {
-        context = coreDataStack.persistentContainer.viewContext
-        var returnHits: [Hit] = []
-        let urlHits = globalSettings.moyaPryazhaSite + globalSettings.moyaPryazhaServicesPath + "srvHits.php"
-        if let hitsURL = URL(string: urlHits) {
-            if let data = getData(url: hitsURL) {
-                let returnData = String(data: data, encoding: .utf8)
-                let inputJSON = returnData?.data(using: .utf8)
-                let decoder = JSONDecoder()
-                decoder.dateDecodingStrategy = .iso8601
-                do {
-                    let hits = try JSONDecoder().decode([HitJSON].self, from: inputJSON!)
-                    if hits.count != 0 {
-                        let deletedHits = deleteHitsFromCoreData(context: self.context)
-                        if deletedHits.count == -1 {
-                            DispatchQueue.main.async {
-                                self.showMessage(title: "Ошибка", message: deletedHits.error)
-                            }
-                            return nil
-                        }
-                        let addedHits = addHitsToCoreData(hits: hits, context: self.context)
-                        if addedHits.count == -1 {
-                            DispatchQueue.main.async {
-                                self.showMessage(title: "Ошибка", message: addedHits.error)
-                            }
-                            return nil
-                        }
-                    }
-                } catch let jsonError {
-                    DispatchQueue.main.async {
-                        self.showMessage(title: "Ошибка", message: jsonError.localizedDescription)
-                    }
-                    print(jsonError)
-                    return nil
+    func parceHits(from data: Data, to context: NSManagedObjectContext) -> ReturnResult {
+        var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
+        let returnData = String(data: data, encoding: .utf8)
+        let inputJSON = returnData?.data(using: .utf8)
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        do {
+            let hits = try JSONDecoder().decode([HitJSON].self, from: inputJSON!)
+            if hits.count != 0 {
+                returnResult = deleteHitsFromCoreData(context: context)
+                if returnResult.count == -1 {
+                    return returnResult
+                }
+                returnResult = addHitsToCoreData(hits: hits, context: context)
+                if returnResult.count == -1 {
+                    return returnResult
                 }
             }
-        }
-        let fetchRequest: NSFetchRequest<Hit> = Hit.fetchRequest()
-        do {
-            let results = try context.fetch(fetchRequest)
-            returnHits = results
         } catch let error as NSError {
-            DispatchQueue.main.async {
-                self.showMessage(title: "Ошибка", message: error.localizedDescription)
-            }
+            returnResult.error = "Ошибка JSON хитов товаров: \(error.localizedDescription)"
+            returnResult.count = -1
         }
-        return returnHits
+        return returnResult
     }
-
+    
+    func loadHitsFromCoreData(context: NSManagedObjectContext) -> ReturnResult{
+        var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
+        let fetchRequest: NSFetchRequest<Hit> = Hit.fetchRequest()
+        // извлекаем из контекста
+        do {
+            hits = try context.fetch(fetchRequest)
+            returnResult.count = hits.count
+        } catch let error as NSError {
+            returnResult.error = "Ошибка извлечения хитов товаров: \(error.localizedDescription)"
+            returnResult.count = -1
+        }
+        return returnResult
+    }
+    
+    
     func deleteHitsFromCoreData(context: NSManagedObjectContext) -> ReturnResult{
         var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
         let fetchRequest: NSFetchRequest<Hit> = Hit.fetchRequest()
@@ -874,17 +896,17 @@ class LoadViewController: UIViewController {
             let results = try context.fetch(fetchRequest)
             for result in results {
                 returnResult.count += 1
-                self.context.delete(result)
+                context.delete(result)
             }
         } catch let error as NSError {
-            returnResult.error = "Ошибка удаления категорий товаров: \(error.localizedDescription)"
+            returnResult.error = "Ошибка удаления хитов товаров: \(error.localizedDescription)"
             returnResult.count = -1
             print(returnResult.error)
         }
         do {
-            try self.context.save()
+            try context.save()
         } catch let error as NSError {
-            returnResult.error = "Ошибка сохранения удаления категорий товаров: \(error.localizedDescription)"
+            returnResult.error = "Ошибка сохранения удаления хитов товаров: \(error.localizedDescription)"
             returnResult.count = -1
             print(returnResult.error)
         }
@@ -895,7 +917,7 @@ class LoadViewController: UIViewController {
         var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
         var hitCurrent: Hit!
         for hit in hits {
-            hitCurrent = Hit(context: self.context)
+            hitCurrent = Hit(context: context)
             // присваиваем переданные свойства
             hitCurrent.order = Int32(hit.ordered) ?? 0
             let productId = Int32(hit.productId) ?? 0
@@ -905,7 +927,7 @@ class LoadViewController: UIViewController {
 
         }
         do {
-            try self.context.save()
+            try context.save()
         } catch let error as NSError {
             returnResult.error = "Ошибка сохранения категорий товаров: \(error.localizedDescription)"
             returnResult.count = -1
@@ -916,53 +938,43 @@ class LoadViewController: UIViewController {
     
     // MARK: PRODUCTPICTURE
 
-    func getProductPictures()-> [ProductPicture]? {
-        context = coreDataStack.persistentContainer.viewContext
-        var returnProductPictures: [ProductPicture] = []
-        let urlProductPictures = globalSettings.moyaPryazhaSite + globalSettings.moyaPryazhaServicesPath + "srvProductPictures.php"
-        if let productPicturesURL = URL(string: urlProductPictures) {
-            if let data = getData(url: productPicturesURL) {
-                let returnData = String(data: data, encoding: .utf8)
-                let inputJSON = returnData?.data(using: .utf8)
-                let decoder = JSONDecoder()
-                decoder.dateDecodingStrategy = .iso8601
-                do {
-                    let productPictures = try JSONDecoder().decode([ProductPictureJSON].self, from: inputJSON!)
-                    if productPictures.count != 0 {
-                        let deletedProductPictures = deleteProductPicturesFromCoreData(context: self.context)
-                        if deletedProductPictures.count == -1 {
-                            DispatchQueue.main.async {
-                                self.showMessage(title: "Ошибка", message: deletedProductPictures.error)
-                            }
-                            return nil
-                        }
-                        let addedProductPictures = addProductPicturesToCoreData(productPictures: productPictures, context: self.context)
-                        if addedProductPictures.count == -1 {
-                            DispatchQueue.main.async {
-                                self.showMessage(title: "Ошибка", message: addedProductPictures.error)
-                            }
-                            return nil
-                        }
-                    }
-                } catch let jsonError {
-                    DispatchQueue.main.async {
-                        self.showMessage(title: "Ошибка", message: jsonError.localizedDescription)
-                    }
-                    print(jsonError)
-                    return nil
+    func parceProductPictures(from data: Data, to context: NSManagedObjectContext) -> ReturnResult {
+        var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
+        let returnData = String(data: data, encoding: .utf8)
+        let inputJSON = returnData?.data(using: .utf8)
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        do {
+            let productPictures = try JSONDecoder().decode([ProductPictureJSON].self, from: inputJSON!)
+            if productPictures.count != 0 {
+                returnResult = deleteProductPicturesFromCoreData(context: context)
+                if returnResult.count == -1 {
+                    return returnResult
+                }
+                returnResult = addProductPicturesToCoreData(productPictures: productPictures, context: context)
+                if returnResult.count == -1 {
+                    return returnResult
                 }
             }
-        }
-        let fetchRequest: NSFetchRequest<ProductPicture> = ProductPicture.fetchRequest()
-        do {
-            let results = try context.fetch(fetchRequest)
-            returnProductPictures = results
         } catch let error as NSError {
-            DispatchQueue.main.async {
-                self.showMessage(title: "Ошибка", message: error.localizedDescription)
-            }
+            returnResult.error = "Ошибка JSON картинок товвров: \(error.localizedDescription)"
+            returnResult.count = -1
         }
-        return returnProductPictures
+        return returnResult
+    }
+    
+    func loadProductPicturesFromCoreData(context: NSManagedObjectContext) -> ReturnResult{
+        var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
+        let fetchRequest: NSFetchRequest<ProductPicture> = ProductPicture.fetchRequest()
+        // извлекаем из контекста
+        do {
+            productPictures = try context.fetch(fetchRequest)
+            returnResult.count = productPictures.count
+        } catch let error as NSError {
+            returnResult.error = "Ошибка извлечения картинок товаров: \(error.localizedDescription)"
+            returnResult.count = -1
+        }
+        return returnResult
     }
 
     func deleteProductPicturesFromCoreData(context: NSManagedObjectContext) -> ReturnResult{
@@ -973,17 +985,17 @@ class LoadViewController: UIViewController {
             let results = try context.fetch(fetchRequest)
             for result in results {
                 returnResult.count += 1
-                self.context.delete(result)
+                context.delete(result)
             }
         } catch let error as NSError {
-            returnResult.error = "Ошибка удаления категорий товаров: \(error.localizedDescription)"
+            returnResult.error = "Ошибка удаления картинок товаров: \(error.localizedDescription)"
             returnResult.count = -1
             print(returnResult.error)
         }
         do {
-            try self.context.save()
+            try context.save()
         } catch let error as NSError {
-            returnResult.error = "Ошибка сохранения удаления категорий товаров: \(error.localizedDescription)"
+            returnResult.error = "Ошибка сохранения удаления картинок товаров: \(error.localizedDescription)"
             returnResult.count = -1
             print(returnResult.error)
         }
@@ -994,7 +1006,7 @@ class LoadViewController: UIViewController {
         var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
         var productPictureCurrent: ProductPicture!
         for productPicture in productPictures {
-            productPictureCurrent = ProductPicture(context: self.context)
+            productPictureCurrent = ProductPicture(context: context)
             // присваиваем переданные свойства
             productPictureCurrent.id = Int32(productPicture.id) ?? 0
             productPictureCurrent.order = Int32(productPicture.ordered) ?? 0
@@ -1005,7 +1017,7 @@ class LoadViewController: UIViewController {
 
         }
         do {
-            try self.context.save()
+            try context.save()
         } catch let error as NSError {
             returnResult.error = "Ошибка сохранения категорий товаров: \(error.localizedDescription)"
             returnResult.count = -1
@@ -1013,7 +1025,6 @@ class LoadViewController: UIViewController {
         }
         return returnResult
     }
-    
     
 }
 
