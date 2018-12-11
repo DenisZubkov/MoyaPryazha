@@ -26,13 +26,26 @@ class ProductDetailViewController: UIViewController, UICollectionViewDataSource,
     let coreDataStack = CoreDataStack()
     var tableParameters: [TableParameter] = []
     var context: NSManagedObjectContext!
+    var price: Int = 0
+    var quantityInBasket = 0
     
     @IBOutlet weak var productImageButton: UIButton!
     
     @IBOutlet weak var loadImageActivityIndicatorView: UIActivityIndicatorView!
     @IBOutlet weak var productImageCollectionView: UICollectionView!
     @IBOutlet weak var productDetailTableView: UITableView!
-    @IBOutlet weak var siteButton: UIButton!
+    
+    @IBOutlet weak var orderButton: UIButton!
+    
+    
+    @IBOutlet weak var inBasketView: UIView!
+    @IBOutlet weak var inBasketLabel: UILabel!
+    @IBOutlet weak var quantityStepper: UIStepper!
+    @IBOutlet weak var quantityTextField: UITextField!
+    @IBOutlet weak var sumLabel: UILabel!
+    @IBOutlet weak var currencySumLabel: UILabel!
+    @IBOutlet weak var basketStackView: UIStackView!
+    
     
     
     
@@ -45,7 +58,67 @@ class ProductDetailViewController: UIViewController, UICollectionViewDataSource,
         guard let product = currentProduct else { return }
         setProductData(for: product)
         loadMainImage()
-        siteButton.layer.cornerRadius = 15
+        
+        inBasketView.layer.borderColor = #colorLiteral(red: 0.4044061303, green: 0.6880503297, blue: 0.001034987159, alpha: 1)
+        inBasketView.layer.borderWidth = 1
+        
+        orderButton.layer.cornerRadius = 15
+        
+        
+        quantityTextField.isEnabled = false
+        quantityInBasket = Int(rootViewController.baskets.filter({$0.product == product}).first?.quantity ?? 0)
+        if quantityInBasket == 0 {
+            inBasketLabel.text = "В корзину"
+            quantityTextField.text = ""
+            quantityTextField.backgroundColor = #colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
+            quantityTextField.textColor = #colorLiteral(red: 0.4044061303, green: 0.6880503297, blue: 0.001034987159, alpha: 1)
+        } else {
+            inBasketLabel.text = "В корзине"
+            quantityTextField.text = "\(quantityInBasket)"
+            quantityTextField.backgroundColor = #colorLiteral(red: 0.4044061303, green: 0.6880503297, blue: 0.001034987159, alpha: 1)
+            quantityTextField.textColor = #colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
+        }
+        quantityStepper.value = Double(quantityInBasket)
+        
+        price = Int(rootViewController.prices.filter({$0.product == product && $0.priceType?.id ?? 1 == 1}).first?.price ?? 0)
+        if price == 0 {
+            orderButton.isHidden = false
+            basketStackView.isHidden = true
+            orderButton.layer.cornerRadius = 5
+        } else{
+            orderButton.isHidden = true
+            basketStackView.isHidden = false
+            currencySumLabel.text = "руб"
+            sumLabel.text = "\(price * quantityInBasket)"
+        }
+        
+    }
+    
+    
+    @IBAction func quantityChangedByStepper(_ sender: UIStepper) {
+        
+        let quantity = Int(quantityStepper.value)
+        if quantity == 0 {
+            quantityTextField.text = ""
+            sumLabel.text = ""
+            currencySumLabel.text = ""
+            quantityTextField.backgroundColor = #colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
+            quantityTextField.textColor = #colorLiteral(red: 0.4044061303, green: 0.6880503297, blue: 0.001034987159, alpha: 1)
+        } else {
+            quantityTextField.text = String(quantity)
+            sumLabel.text = String(quantity * price)
+            currencySumLabel.text = "руб"
+            quantityTextField.backgroundColor = #colorLiteral(red: 0.4044061303, green: 0.6880503297, blue: 0.001034987159, alpha: 1)
+            quantityTextField.textColor = #colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
+            
+        }
+        let result = rootViewController.putProductToBasket(product: currentProduct, quantity: quantity)
+        if result.count != -1 {
+            quantityInBasket = quantity
+            tabBarController?.tabBar.items?[2].badgeValue = "\(rootViewController.sumBasket())"
+        } else {
+            print(result.error)
+        }
     }
     
     // MARK: SET VIEW FUNCTIONS

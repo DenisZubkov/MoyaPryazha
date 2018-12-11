@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="14460.14.2" systemVersion="18A389" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="14460.32" systemVersion="18C48a" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
     <entity name="Category" representedClassName="Category" syncable="YES" codeGenerationType="class">
         <attribute name="desc" optional="YES" attributeType="Binary" syncable="YES"/>
         <attribute name="id" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="noShow" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="order" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="parentId" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="picture" optional="YES" attributeType="Binary" syncable="YES"/>
@@ -48,6 +49,7 @@
         <attribute name="desc" optional="YES" attributeType="Binary" syncable="YES"/>
         <attribute name="id" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="noShow" attributeType="Boolean" defaultValueString="YES" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="order" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
         <attribute name="slug" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="thumbnail" optional="YES" attributeType="Binary" syncable="YES"/>
@@ -56,7 +58,13 @@
         <relationship name="hit" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Hit" inverseName="product" inverseEntity="Hit" syncable="YES"/>
         <relationship name="pictures" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="ProductPicture" inverseName="product" inverseEntity="ProductPicture" syncable="YES"/>
         <relationship name="prices" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Price" inverseName="product" inverseEntity="Price" syncable="YES"/>
+        <relationship name="productBasket" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="ProductBasket" inverseName="product" inverseEntity="ProductBasket" syncable="YES"/>
         <relationship name="productParameters" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="ProductParameter" inverseName="product" inverseEntity="ProductParameter" syncable="YES"/>
+    </entity>
+    <entity name="ProductBasket" representedClassName="ProductBasket" syncable="YES" codeGenerationType="class">
+        <attribute name="order" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="quantity" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <relationship name="product" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Product" inverseName="productBasket" inverseEntity="Product" syncable="YES"/>
     </entity>
     <entity name="ProductParameter" representedClassName="ProductParameter" syncable="YES" codeGenerationType="class">
         <attribute name="id" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
@@ -71,15 +79,34 @@
         <attribute name="path" optional="YES" attributeType="String" syncable="YES"/>
         <relationship name="product" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Product" inverseName="pictures" inverseEntity="Product" syncable="YES"/>
     </entity>
+    <entity name="User" representedClassName="User" syncable="YES" codeGenerationType="class">
+        <attribute name="delivery" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="email" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="id" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="login" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="password" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="payment" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <attribute name="phone" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="userAdresses" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="UserAddress" inverseName="user" inverseEntity="UserAddress" syncable="YES"/>
+    </entity>
+    <entity name="UserAddress" representedClassName="UserAddress" syncable="YES" codeGenerationType="class">
+        <attribute name="address" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="id" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES" syncable="YES"/>
+        <relationship name="user" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="User" inverseName="userAdresses" inverseEntity="User" syncable="YES"/>
+    </entity>
     <elements>
-        <element name="Category" positionX="-1138.8203125" positionY="-344.99609375" width="128" height="210"/>
+        <element name="Category" positionX="-1219.8046875" positionY="-410.6953125" width="128" height="225"/>
         <element name="Currency" positionX="-560.52734375" positionY="135.78515625" width="128" height="133"/>
-        <element name="Hit" positionX="-1108.26171875" positionY="-142.1484375" width="128" height="75"/>
+        <element name="Hit" positionX="-1108.2265625" positionY="-141.890625" width="128" height="75"/>
         <element name="Parameter" positionX="-344.734375" positionY="6.94921875" width="128" height="118"/>
         <element name="Price" positionX="-915.76171875" positionY="-58.82421875" width="128" height="118"/>
         <element name="PriceType" positionX="-1136.41796875" positionY="8.5078125" width="128" height="88"/>
-        <element name="Product" positionX="-748.99609375" positionY="-330.36328125" width="128" height="225"/>
+        <element name="Product" positionX="-755.1015625" positionY="-345.375" width="128" height="255"/>
+        <element name="ProductBasket" positionX="-730.66796875" positionY="-71.328125" width="128" height="88"/>
         <element name="ProductParameter" positionX="-498.8828125" positionY="-64.640625" width="128" height="103"/>
         <element name="ProductPicture" positionX="-549.00390625" positionY="-315.546875" width="128" height="118"/>
+        <element name="User" positionX="-1005.8984375" positionY="-425.11328125" width="128" height="178"/>
+        <element name="UserAddress" positionX="-793.5859375" positionY="-441.73828125" width="128" height="88"/>
     </elements>
 </model>

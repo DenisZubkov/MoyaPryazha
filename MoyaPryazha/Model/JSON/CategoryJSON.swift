@@ -13,11 +13,13 @@ struct CategoryJSON: Codable {
     let id, slug, parentId, name, descriprion: String
     let picture, thumbnail: String?
     let order: String
+    let noShow: String
     
     enum CodingKeys: String, CodingKey {
         case id,slug
         case parentId = "parentId"
         case name, descriprion, picture, thumbnail
         case order = "ordering"
+        case noShow = "published"
     }
 }

@@ -40,7 +40,15 @@ class CategoryViewController: UIViewController, UITableViewDataSource, UITableVi
         navigationController?.navigationBar.shadowImage = UIImage()
         tabBarController?.tabBar.tintColor = .white
         tabBarController?.tabBar.unselectedItemTintColor = UIColor.black
+        tabBarController?.tabBar.items?[1].badgeColor = #colorLiteral(red: 0.4044061303, green: 0.6880503297, blue: 0.001034987159, alpha: 1)
+        tabBarController?.tabBar.items?[2].badgeColor = #colorLiteral(red: 0.4044061303, green: 0.6880503297, blue: 0.001034987159, alpha: 1)
         tabBarController?.tabBar.items?[1].badgeValue = "\(rootViewController.products.count)"
+        let sumBasket = self.rootViewController.sumBasket()
+        if sumBasket == 0  {
+            tabBarController?.tabBar.items?[2].badgeValue = nil
+        } else {
+            tabBarController?.tabBar.items?[2].badgeValue = "\(sumBasket)"
+        }
         titleLabel.font = UIFont(name: "AaarghCyrillicBold", size: 17)// Нужный шрифт
         titleLabel.text = "Каталог товаров магазина"
         titleLabel.textColor = UIColor.white
@@ -69,10 +77,12 @@ class CategoryViewController: UIViewController, UITableViewDataSource, UITableVi
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath) as! CategoryTableViewCell
+        
         cell.thumbnailImage.layer.cornerRadius = 70
         cell.thumbnailImage.layer.borderWidth = 3
         cell.thumbnailImage.layer.borderColor = #colorLiteral(red: 0.9882352941, green: 0.6470588235, blue: 0.02352941176, alpha: 1)
         cell.thumbnailImage.clipsToBounds = true
+        cell.thumbnailImage.image = UIImage(named: "blank")
         cell.loadActivityIndicator.isHidden = true
         cell.loadActivityIndicator.stopAnimating()
         let category = viewCategories[indexPath.row]
@@ -84,6 +94,7 @@ class CategoryViewController: UIViewController, UITableViewDataSource, UITableVi
                     cell.loadActivityIndicator.startAnimating()
                     self.dataProvider.downloadImage(url: imageURL) { image in
                         guard let image = image else {
+                            
                             cell.loadActivityIndicator.isHidden = true
                             cell.loadActivityIndicator.stopAnimating()
                             return

@@ -1,0 +1,141 @@
+
+/* Class = "UIButton"; normalTitle = "@moyapryazha.ru"; ObjectID = "1es-IZ-X8p"; */
+"1es-IZ-X8p.normalTitle" = "@moyapryazha.ru";
+
+/* Class = "UIButton"; normalTitle = "Заказать"; ObjectID = "2Zm-Oz-WqB"; */
+"2Zm-Oz-WqB.normalTitle" = "Заказать";
+
+/* Class = "UIButton"; normalTitle = "Заказать"; ObjectID = "BuS-Qp-yYI"; */
+"BuS-Qp-yYI.normalTitle" = "Заказать";
+
+/* Class = "UITextField"; text = "1"; ObjectID = "C1h-uC-kjj"; */
+"C1h-uC-kjj.text" = "1";
+
+/* Class = "UITextField"; text = "1"; ObjectID = "EB8-ik-q7c"; */
+"EB8-ik-q7c.text" = "1";
+
+/* Class = "UIButton"; normalTitle = "@MPryazha"; ObjectID = "GxR-jB-MJ0"; */
+"GxR-jB-MJ0.normalTitle" = "@MPryazha";
+
+/* Class = "UILabel"; text = "Name"; ObjectID = "JOh-dk-7RT"; */
+"JOh-dk-7RT.text" = "Name";
+
+/* Class = "UILabel"; text = "Label"; ObjectID = "JsI-mZ-YaF"; */
+"JsI-mZ-YaF.text" = "Label";
+
+/* Class = "UITabBarItem"; title = "О нас"; ObjectID = "KEw-Yj-ELI"; */
+"KEw-Yj-ELI.title" = "О нас";
+
+/* Class = "UILabel"; text = "Key"; ObjectID = "KV9-W0-znt"; */
+"KV9-W0-znt.text" = "Key";
+
+/* Class = "UIButton"; normalTitle = "+7 (495) 466-7282"; ObjectID = "L5F-6s-j7Q"; */
+"L5F-6s-j7Q.normalTitle" = "+7 (495) 466-7282";
+
+/* Class = "UILabel"; text = "Сумма:"; ObjectID = "LlH-5Y-ZmQ"; */
+"LlH-5Y-ZmQ.text" = "Сумма:";
+
+/* Class = "UILabel"; text = "руб"; ObjectID = "MlB-Uu-r8F"; */
+"MlB-Uu-r8F.text" = "руб";
+
+/* Class = "UILabel"; text = "220"; ObjectID = "MmU-E7-G7x"; */
+"MmU-E7-G7x.text" = "220";
+
+/* Class = "UITableViewSection"; headerTitle = "Мы в Интернет"; ObjectID = "Mpv-8n-wgG"; */
+"Mpv-8n-wgG.headerTitle" = "Мы в Интернет";
+
+/* Class = "UIButton"; normalTitle = "@moya_pryazha"; ObjectID = "N4c-pX-i2T"; */
+"N4c-pX-i2T.normalTitle" = "@moya_pryazha";
+
+/* Class = "UIBarButtonItem"; title = " "; ObjectID = "Ora-rp-100"; */
+"Ora-rp-100.title" = " ";
+
+/* Class = "UILabel"; text = "Value"; ObjectID = "OzR-i3-Dtc"; */
+"OzR-i3-Dtc.text" = "Value";
+
+/* Class = "UITableViewSection"; headerTitle = "Адрес"; ObjectID = "PNz-eh-Ypf"; */
+"PNz-eh-Ypf.headerTitle" = "Адрес";
+
+/* Class = "UIButton"; normalTitle = "info@moya-pryazha.ru"; ObjectID = "PSK-Od-rKv"; */
+"PSK-Od-rKv.normalTitle" = "info@moya-pryazha.ru";
+
+/* Class = "UITabBarItem"; title = "Каталог"; ObjectID = "PXs-qT-M57"; */
+"PXs-qT-M57.title" = "Каталог";
+
+/* Class = "UILabel"; text = "руб"; ObjectID = "Qqv-tA-7l9"; */
+"Qqv-tA-7l9.text" = "руб";
+
+/* Class = "UILabel"; text = "руб"; ObjectID = "S1c-aj-0T7"; */
+"S1c-aj-0T7.text" = "руб";
+
+/* Class = "UIButton"; normalTitle = "www.moya-pryazha.ru"; ObjectID = "SkL-Xb-6xw"; */
+"SkL-Xb-6xw.normalTitle" = "www.moya-pryazha.ru";
+
+/* Class = "UILabel"; text = "20000"; ObjectID = "Tel-b0-X6m"; */
+"Tel-b0-X6m.text" = "20000";
+
+/* Class = "UIBarButtonItem"; title = "  "; ObjectID = "WVT-eB-KnB"; */
+"WVT-eB-KnB.title" = "  ";
+
+/* Class = "UINavigationItem"; title = "Корзина"; ObjectID = "YK0-Q0-vQ3"; */
+"YK0-Q0-vQ3.title" = "Корзина";
+
+/* Class = "UIButton"; normalTitle = "Заказать"; ObjectID = "ZPZ-lJ-ypF"; */
+"ZPZ-lJ-ypF.normalTitle" = "Заказать";
+
+/* Class = "UITabBarItem"; title = "Корзина"; ObjectID = "bfR-Xy-UaI"; */
+"bfR-Xy-UaI.title" = "Корзина";
+
+/* Class = "UILabel"; text = "220"; ObjectID = "ddQ-ov-7HP"; */
+"ddQ-ov-7HP.text" = "220";
+
+/* Class = "UINavigationItem"; title = "Интернет-магазин Моя пряжа"; ObjectID = "eCY-4d-cmh"; */
+"eCY-4d-cmh.title" = "Интернет-магазин Моя пряжа";
+
+/* Class = "UINavigationItem"; title = "Товары"; ObjectID = "elT-zz-wX9"; */
+"elT-zz-wX9.title" = "Товары";
+
+/* Class = "UILabel"; text = "руб"; ObjectID = "fA6-AV-cWu"; */
+"fA6-AV-cWu.text" = "руб";
+
+/* Class = "UIViewController"; title = "Изображение"; ObjectID = "fh5-mz-Mmb"; */
+"fh5-mz-Mmb.title" = "Изображение";
+
+/* Class = "UILabel"; text = "В корзину"; ObjectID = "g71-ph-nhZ"; */
+"g71-ph-nhZ.text" = "В корзину";
+
+/* Class = "UIBarButtonItem"; title = "  "; ObjectID = "gnB-qn-a4d"; */
+"gnB-qn-a4d.title" = "  ";
+
+/* Class = "UITableViewSection"; headerTitle = "Контакты"; ObjectID = "gxk-uk-I34"; */
+"gxk-uk-I34.headerTitle" = "Контакты";
+
+/* Class = "UILabel"; text = "220"; ObjectID = "iP8-bq-ELV"; */
+"iP8-bq-ELV.text" = "220";
+
+/* Class = "UILabel"; text = "руб"; ObjectID = "m9x-Wq-FSW"; */
+"m9x-Wq-FSW.text" = "руб";
+
+/* Class = "UILabel"; text = "LANA GATTO MAXI SOFT небесно-голубой (12260)"; ObjectID = "mVL-Gr-5Eu"; */
+"mVL-Gr-5Eu.text" = "LANA GATTO MAXI SOFT небесно-голубой (12260)";
+
+/* Class = "UILabel"; text = "220"; ObjectID = "pSW-p4-wJC"; */
+"pSW-p4-wJC.text" = "220";
+
+/* Class = "UITabBarItem"; title = "Все товары"; ObjectID = "pgN-OG-vWL"; */
+"pgN-OG-vWL.title" = "Все товары";
+
+/* Class = "UILabel"; text = "220"; ObjectID = "qAw-ti-hbX"; */
+"qAw-ti-hbX.text" = "220";
+
+/* Class = "UITextField"; text = "1"; ObjectID = "t5A-hO-yuJ"; */
+"t5A-hO-yuJ.text" = "1";
+
+/* Class = "UIBarButtonItem"; title = " "; ObjectID = "tge-hk-dFd"; */
+"tge-hk-dFd.title" = " ";
+
+/* Class = "UILabel"; text = "LANA GATTO MAXI SOFT небесно-голубой (12260)"; ObjectID = "umu-Xa-V0L"; */
+"umu-Xa-V0L.text" = "LANA GATTO MAXI SOFT небесно-голубой (12260)";
+
+/* Class = "UILabel"; text = "руб"; ObjectID = "w8R-i2-tKb"; */
+"w8R-i2-tKb.text" = "руб";

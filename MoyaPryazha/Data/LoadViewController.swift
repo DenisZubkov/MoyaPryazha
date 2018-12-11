@@ -23,52 +23,141 @@ class LoadViewController: UIViewController {
     var currencies: [Currency] = []
     var priceTypes: [PriceType] = []
     var prices: [Price] = []
+    var baskets: [ProductBasket] = []
     var parameters: [Parameter] = []
+    var user: User?
+    var userAddresses: [UserAddress] = []
     var productParameters: [ProductParameter] = []
     var hits: [Hit] = []
     var productPictures: [ProductPicture] = []
     var resultsCoreData: [ReturnResult] = []
     var resultsServer: [ReturnData] = []
     
+    
     override func viewDidLoad() {
         super.viewDidLoad()
     }
     
     override func viewDidAppear(_ animated: Bool) {
-        
         loadActivity.isHidden = false
         loadActivity.startAnimating()
-        resultsServer = loadDataFromServer()
-        var lastModifiedDateFromServer: Date?
         let lastModifiedDateFromMemory = UserDefaults.standard.value(forKey: "LastModified") as? Date
-        let dataLastModifiedDate = resultsServer.filter{$0.dataType == .lastModified}
-        if let data = dataLastModifiedDate.first?.data {
-            lastModifiedDateFromServer = parceLastModifiedDate(data: data)
-        }
+        context = coreDataStack.persistentContainer.viewContext
+        let _ = loadBasketsFromCoreData(context: context)
         if lastModifiedDateFromMemory == nil {
-            parceJSON()
-            UserDefaults.standard.set(lastModifiedDateFromServer, forKey: "LastModified")
-        } else {
-            if let lastModifiedDateFromServer = lastModifiedDateFromServer {
-                if lastModifiedDateFromMemory! < lastModifiedDateFromServer {
-                    parceJSON()
-                    UserDefaults.standard.set(lastModifiedDateFromServer, forKey: "LastModified")
+            parceFile()
+        }
+        resultsServer = loadDataFromServer()
+            var lastModifiedDateFromServer: Date?
+            let dataLastModifiedDate = resultsServer.filter{$0.dataType == .lastModified}
+            if let data = dataLastModifiedDate.first?.data {
+                lastModifiedDateFromServer = parceLastModifiedDate(data: data)
+            }
+            if lastModifiedDateFromMemory == nil {
+                parceJSON()
+                UserDefaults.standard.set(lastModifiedDateFromServer, forKey: "LastModified")
+            } else {
+                if let lastModifiedDateFromServer = lastModifiedDateFromServer {
+                    if lastModifiedDateFromMemory! < lastModifiedDateFromServer {
+                        parceJSON()
+                        UserDefaults.standard.set(lastModifiedDateFromServer, forKey: "LastModified")
+                    } else {
+                        resultsCoreData = loadDataFromCoreData()
+                    }
                 } else {
                     resultsCoreData = loadDataFromCoreData()
                 }
-            } else {
-                resultsCoreData = loadDataFromCoreData()
+            }
+            //        for result in resultsCoreData {
+            //            print("ResultCoreData: \(result.count) \(result.error)")
+            //        }
+            //        for result in resultsServer {
+            //            print("ResultServer: \(result.dataType) \(result.errorType.rawValue) \(result.description) \(result.data?.count ?? -1)")
+            //        }
+            loadActivity.isHidden = true
+            loadActivity.stopAnimating()
+        
+        performSegue(withIdentifier: "ToMainSegue", sender: nil)
+    }
+    
+    // MARG: FIRSTLOAD
+    
+    func loadFromFile(fileName: String, fileExtenition: String) -> Data? {
+        if let path = Bundle.main.path(forResource: fileName, ofType: fileExtenition) {
+            let fileManager = FileManager()
+            let exists = fileManager.fileExists(atPath: path)
+            if(exists){
+                let content = fileManager.contents(atPath: path)
+                return content
             }
         }
-        for result in resultsCoreData {
-            print("ResultCoreData: \(result.count) \(result.error)")
+        return nil
+    }
+    
+    func parceFile() {
+        context = coreDataStack.persistentContainer.viewContext
+        if let data = loadFromFile(fileName: "Categories", fileExtenition: "json") {
+            let _ = parceCategories(from: data, to: context)
         }
-        for result in resultsServer {
-            print("ResultServer: \(result.dataType) \(result.errorType.rawValue) \(result.description) \(result.data?.count ?? -1)")
+        let _ = loadCategoriesFromCoreData(context: context)
+        //print("Category File: \(loadResult.count) \(loadResult.error)")
+        
+        if let data = loadFromFile(fileName: "Products", fileExtenition: "json") {
+            let _ = parceProducts(from: data, to: context)
+            
         }
-        loadActivity.isHidden = true
-        loadActivity.stopAnimating()
-        performSegue(withIdentifier: "ToMainSegue", sender: nil)
+        let _ = loadProductsFromCoreData(context: context)
+        //print("Product File: \(loadResult.count) \(loadResult.error)")
+        
+       if let data = loadFromFile(fileName: "Currencies", fileExtenition: "json") {
+            let _ = parceCurrencies(from: data, to: context)
+        }
+        let _ = loadCurrenciesFromCoreData(context: context)
+        //print("Currency File: \(loadResult.count) \(loadResult.error)")
+        
+        let _ = parcePriceType(to: context)
+        let _ = loadPriceTypesFromCoreData(context: context)
+        //print("PriceType File: \(loadResult.count) \(loadResult.error)")
+        
+        if let data = loadFromFile(fileName: "Prices", fileExtenition: "json") {
+            let _ = parcePrices(from: data, to: context)
+        }
+        let _ = loadPricesFromCoreData(context: context)
+        //print("Prices File: \(loadResult.count) \(loadResult.error)")
+        
+        if let data = loadFromFile(fileName: "Parameters", fileExtenition: "json") {
+            let _ = parceParameters(from: data, to: context)
+        }
+        let _ = loadParametersFromCoreData(context: context)
+        //print("Parameters File: \(loadResult.count) \(loadResult.error)")
+        
+        if let data = loadFromFile(fileName: "ProductParameters", fileExtenition: "json") {
+            let _ = parceProductParameters(from: data, to: context)
+        }
+        let _ = loadProductParametersFromCoreData(context: context)
+        //print("Product Parameters File: \(loadResult.count) \(loadResult.error)")
+        
+        if let data = loadFromFile(fileName: "Hits", fileExtenition: "json") {
+            let _ = parceHits(from: data, to: context)
+        }
+        let _ = loadHitsFromCoreData(context: context)
+        //print("Hits File: \(loadResult.count) \(loadResult.error)")
+        
+        if let data = loadFromFile(fileName: "ProductPictures", fileExtenition: "json") {
+            let _ = parceProductPictures(from: data, to: context)
+        }
+        let _ = loadProductPicturesFromCoreData(context: context)
+        //print("Product Pictures File: \(loadResult.count) \(loadResult.error)")
+        
+        if let data = loadFromFile(fileName: "LastModified", fileExtenition: "json") {
+            let date = parceLastModifiedDate( data: data)
+            UserDefaults.standard.set(date, forKey: "LastModified")
+        }
+        let _ = loadProductsFromCoreData(context: context)
+        //UserDefaults.standard.set(loadResult, forKey: "LoadResult")
+        let _ = loadUserFromCoreData(context: context)
+        let _ = loadUserAddressFromCoreData(context: context)
+
     }
     
     // MARK: LOADMODEL
@@ -129,68 +218,68 @@ class LoadViewController: UIViewController {
         if let data = result.first?.data {
             let _ = parceCategories(from: data, to: context)
         }
-        var loadResult = loadCategoriesFromCoreData(context: context)
-        print("Category CoreData: \(loadResult.count) \(loadResult.error)")
+        let _ = loadCategoriesFromCoreData(context: context)
+        //print("Category CoreData: \(loadResult.count) \(loadResult.error)")
         
         result = resultsServer.filter{$0.dataType == .product}
         if let data = result.first?.data {
             let _ = parceProducts(from: data, to: context)
             
         }
-        loadResult = loadProductsFromCoreData(context: context)
-        print("Product CoreData: \(loadResult.count) \(loadResult.error)")
+        let _ = loadProductsFromCoreData(context: context)
+        //print("Product CoreData: \(loadResult.count) \(loadResult.error)")
         
         result = resultsServer.filter{$0.dataType == .currency}
         if let data = result.first?.data {
             let _ = parceCurrencies(from: data, to: context)
         }
-        loadResult = loadCurrenciesFromCoreData(context: context)
-        print("Currency CoreData: \(loadResult.count) \(loadResult.error)")
+        let _ = loadCurrenciesFromCoreData(context: context)
+        //print("Currency CoreData: \(loadResult.count) \(loadResult.error)")
         
         let _ = parcePriceType(to: context)
-        loadResult = loadPriceTypesFromCoreData(context: context)
-        print("PriceType CoreData: \(loadResult.count) \(loadResult.error)")
+        let _ = loadPriceTypesFromCoreData(context: context)
+        //print("PriceType CoreData: \(loadResult.count) \(loadResult.error)")
         
         result = resultsServer.filter{$0.dataType == .price}
         if let data = result.first?.data {
             let _ = parcePrices(from: data, to: context)
         }
-        loadResult = loadPricesFromCoreData(context: context)
-        print("Prices CoreData: \(loadResult.count) \(loadResult.error)")
+        let _ = loadPricesFromCoreData(context: context)
+        //print("Prices CoreData: \(loadResult.count) \(loadResult.error)")
         
         result = resultsServer.filter{$0.dataType == .parameter}
         if let data = result.first?.data {
             let _ = parceParameters(from: data, to: context)
         }
-        loadResult = loadParametersFromCoreData(context: context)
-        print("Parameters CoreData: \(loadResult.count) \(loadResult.error)")
+        let _ = loadParametersFromCoreData(context: context)
+        //print("Parameters CoreData: \(loadResult.count) \(loadResult.error)")
         
         result = resultsServer.filter{$0.dataType == .productParameter}
         if let data = result.first?.data {
             let _ = parceProductParameters(from: data, to: context)
         }
-        loadResult = loadProductParametersFromCoreData(context: context)
-        print("Product Parameters CoreData: \(loadResult.count) \(loadResult.error)")
+        let _ = loadProductParametersFromCoreData(context: context)
+        //print("Product Parameters CoreData: \(loadResult.count) \(loadResult.error)")
         
         result = resultsServer.filter{$0.dataType == .hit}
         if let data = result.first?.data {
             let _ = parceHits(from: data, to: context)
         }
-        loadResult = loadHitsFromCoreData(context: context)
-        print("Hits CoreData: \(loadResult.count) \(loadResult.error)")
+        let _ = loadHitsFromCoreData(context: context)
+        //print("Hits CoreData: \(loadResult.count) \(loadResult.error)")
         
         result = resultsServer.filter{$0.dataType == .productPicture}
         if let data = result.first?.data {
             let _ = parceProductPictures(from: data, to: context)
         }
-        loadResult = loadProductPicturesFromCoreData(context: context)
-        print("Product Pictures CoreData: \(loadResult.count) \(loadResult.error)")
+        let _ = loadProductPicturesFromCoreData(context: context)
+        //print("Product Pictures CoreData: \(loadResult.count) \(loadResult.error)")
         
     }
     
     func getData(url: URL, dataType: DataType) -> ReturnData {
         var returnData = ReturnData.init(dataType: dataType, errorType: .none, description: "", data: nil)
-        let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringLocalCacheData, timeoutInterval: 50)
+        let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringLocalCacheData, timeoutInterval: 15)
         var isLoad = false
         let dataTask = URLSession.shared.dataTask(with: request) { data, response, error in
             if error != nil {
@@ -268,10 +357,6 @@ class LoadViewController: UIViewController {
         do {
             let categories = try JSONDecoder().decode([CategoryJSON].self, from: inputJSON!)
             if categories.count != 0 {
-                returnResult = deleteCategoriesFromCoreData(context: context)
-                if returnResult.count == -1 {
-                    return returnResult
-                }
                 returnResult = addCategoriesToCoreData(categories: categories, context: context)
                 if returnResult.count == -1 {
                     return returnResult
@@ -287,6 +372,7 @@ class LoadViewController: UIViewController {
     func loadCategoriesFromCoreData(context: NSManagedObjectContext) -> ReturnResult {
         var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
         let fetchRequest: NSFetchRequest<Category> = Category.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "noShow == FALSE")
         // извлекаем из контекста
         do {
             categories = try context.fetch(fetchRequest)
@@ -298,34 +384,37 @@ class LoadViewController: UIViewController {
         return returnResult
     }
     
-    func deleteCategoriesFromCoreData(context: NSManagedObjectContext) -> ReturnResult {
-        var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
-        let fetchRequest: NSFetchRequest<Category> = Category.fetchRequest()
-        // извлекаем из контекста
-        do {
-            let results = try context.fetch(fetchRequest)
-            for result in results {
-                returnResult.count += 1
-                context.delete(result)
-            }
-        } catch let error as NSError {
-            returnResult.error = "Ошибка удаления категорий: \(error.localizedDescription)"
-            returnResult.count = -1
-        }
-        do {
-            try context.save()
-        } catch let error as NSError {
-            returnResult.error = "Ошибка сохранения удаления категорий: \(error.localizedDescription)"
-            returnResult.count = -1
-            print(returnResult.error)}
-        return returnResult
-    }
-    
     func addCategoriesToCoreData(categories: [CategoryJSON], context: NSManagedObjectContext) -> ReturnResult {
         var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
         var categoryCurrent: Category!
+        
+        // Извлекаем существующие Категории из CoreData
+        let fetchRequest: NSFetchRequest<Category> = Category.fetchRequest()
+        var categoriesCoreData: [Category] = []
+        do {
+            let results = try context.fetch(fetchRequest)
+            // все сущестующие категории делаем невидимыми
+            for result in results {
+                result.noShow = false
+            }
+            categoriesCoreData = results
+        } catch let error as NSError {
+            returnResult.error = "Ошибка извлечения категорий: \(error.localizedDescription)"
+            returnResult.count = -1
+        }
+        
+        // добавление новых категорий, изменение существующих
         for category in categories {
-            categoryCurrent = Category(context: context)
+            // проверяем наличие категории из JSON
+            if let categoryId = Int32(category.id),
+                let isCoreData = categoriesCoreData.filter({$0.id == categoryId}).first {
+                //если есть категория то меняем ее
+                categoryCurrent = isCoreData
+            } else {
+                // если нет категории создаем новую
+                categoryCurrent = Category(context: context)
+            }
+            
             // присваиваем переданные свойства
             categoryCurrent.id = Int32(category.id) ?? 0
             var categoryName: String? = category.name
@@ -336,6 +425,7 @@ class LoadViewController: UIViewController {
             categoryCurrent.parentId = Int32(category.parentId) ?? 0
             categoryCurrent.order = Int32(category.order) ?? 0
             categoryCurrent.slug = category.slug
+            categoryCurrent.noShow = category.noShow == "1" ? false : true
             returnResult.count += returnResult.count
             
         }
@@ -359,10 +449,6 @@ class LoadViewController: UIViewController {
         do {
             let products = try JSONDecoder().decode([ProductJSON].self, from: inputJSON!)
             if products.count != 0 {
-                returnResult = deleteProductsFromCoreData(context: context)
-                if returnResult.count == -1 {
-                    return returnResult
-                }
                 returnResult = addProductsToCoreData(products: products, context: context)
                 if returnResult.count == -1 {
                     return returnResult
@@ -378,6 +464,7 @@ class LoadViewController: UIViewController {
     func loadProductsFromCoreData(context: NSManagedObjectContext) -> ReturnResult{
         var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
         let fetchRequest: NSFetchRequest<Product> = Product.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "noShow == FALSE")
         // извлекаем из контекста
         do {
             products = try context.fetch(fetchRequest)
@@ -417,8 +504,35 @@ class LoadViewController: UIViewController {
     func addProductsToCoreData(products: [ProductJSON], context: NSManagedObjectContext) -> ReturnResult{
         var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
         var productCurrent: Product!
+        
+        // Извлекаем существующие Категории из CoreData
+        let fetchRequest: NSFetchRequest<Product> = Product.fetchRequest()
+        var productsCoreData: [Product] = []
+        do {
+            
+            let results = try context.fetch(fetchRequest)
+            // все сущестующие категории делаем невидимыми
+            for result in results {
+                result.noShow = true
+            }
+            productsCoreData = results
+        } catch let error as NSError {
+            returnResult.error = "Ошибка извлечения товаров: \(error.localizedDescription)"
+            returnResult.count = -1
+        }
+        
+        // добавление новых категорий, изменение существующих
         for product in products {
-            productCurrent = Product(context: context)
+            // проверяем наличие категории из JSON
+            if let productId = Int32(product.id),
+                let isCoreData = productsCoreData.filter({$0.id == productId}).first {
+                //если есть категория то меняем ее
+                productCurrent = isCoreData
+            } else {
+                // если нет категории создаем новую
+                productCurrent = Product(context: context)
+            }
+            
             // присваиваем переданные свойства
             productCurrent.id = Int32(product.id) ?? 0
             productCurrent.slug = product.slug
@@ -427,7 +541,10 @@ class LoadViewController: UIViewController {
             productCurrent.order = Int32(product.ordered) ?? 0
             let categoryId = Int32(product.categoryId) ?? 0
             productCurrent.category = self.categories.filter({$0.id == categoryId}).first
+            productCurrent.noShow = product.noShow == "1" ? false : true
             returnResult.count += returnResult.count
+            
+            
             
         }
         do {
@@ -1025,6 +1142,234 @@ class LoadViewController: UIViewController {
         }
         return returnResult
     }
+    
+    //MARK: Basket
+    
+    func loadBasketsFromCoreData(context: NSManagedObjectContext) -> ReturnResult {
+        var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
+        let fetchRequest: NSFetchRequest<ProductBasket> = ProductBasket.fetchRequest()
+        // извлекаем из контекста
+        do {
+            baskets = try context.fetch(fetchRequest)
+            returnResult.count = baskets.count
+        } catch let error as NSError {
+            returnResult.error = "Ошибка извлечения корзины: \(error.localizedDescription)"
+            returnResult.count = -1
+        }
+        return returnResult
+    }
+    
+    
+    func sumBasket() -> Int {
+        let sum = baskets.reduce(0) { (total, basket) -> Int in
+            guard let price = prices.filter({$0.product == basket.product && $0.priceType?.id ?? 1 == 1}).first?.price else { return 0 }
+            return total + Int(basket.quantity) * Int(price)
+        }
+        return sum
+    }
+    
+    
+    func appendToBasket(product: Product, quantity: Int, context: NSManagedObjectContext) {
+        guard let entity =  NSEntityDescription.entity(forEntityName: "ProductBasket", in: context) else { return }
+        let basketNew = NSManagedObject(entity: entity, insertInto: context)
+        basketNew.setValue(Int32(baskets.count), forKey: "order")
+        basketNew.setValue(product, forKey: "product")
+        basketNew.setValue(Int32(quantity), forKey: "quantity")
+        baskets.append(basketNew as! ProductBasket)
+    }
+    
+    func putProductToBasket(product: Product?, quantity: Int) -> ReturnResult {
+        var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
+        if let product = product {
+            if let basket = baskets.filter({$0.product == product}).first {
+                basket.quantity = Int32(quantity)
+                if basket.quantity == 0 {
+                    for i in 0..<baskets.count {
+                        if baskets[i].product == product {
+                            baskets.remove(at: i)
+                            break
+                        }
+                    }
+                    context.delete(basket)
+                }
+            } else {
+                appendToBasket(product: product, quantity: quantity, context: context)
+            }
+            do {
+                try context.save()
+                return returnResult
+            } catch let error as NSError {
+                returnResult.error = "Ошибка сохранения товара в корзину: \(error.localizedDescription)"
+                returnResult.count = -1
+                print(returnResult.error)
+                return returnResult
+                
+            }
+        } else {
+            return returnResult
+        }
+    }
+    
+    //MARK: User
+    
+    func loadUserFromCoreData(context: NSManagedObjectContext) -> ReturnResult {
+        var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
+        let fetchRequest: NSFetchRequest<User> = User.fetchRequest()
+        // извлекаем из контекста
+        do {
+            let users = try context.fetch(fetchRequest)
+            if users.count == 0 {
+                user = createUser()
+            } else {
+                user = users.first
+            }
+            returnResult.count = users.count
+        } catch let error as NSError {
+            returnResult.error = "Ошибка извлечения пользователя: \(error.localizedDescription)"
+            returnResult.count = -1
+        }
+        return returnResult
+    }
+    
+    func createUser() -> User? {
+        var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
+        guard let entity =  NSEntityDescription.entity(forEntityName: "User", in: context) else { return nil }
+        let userNew = NSManagedObject(entity: entity, insertInto: context)
+        userNew.setValue(Int32(1), forKey: "id")
+        userNew.setValue("", forKey: "name")
+        userNew.setValue("", forKey: "phone")
+        userNew.setValue("", forKey: "email")
+        userNew.setValue(Int32(0), forKey: "delivery")
+        userNew.setValue(Int32(0), forKey: "payment")
+        do {
+            try context.save()
+        } catch let error as NSError {
+            returnResult.error = "Ошибка сохранения изменения пользователя: \(error.localizedDescription)"
+            returnResult.count = -1
+            print(returnResult.error)
+        }
+        returnResult = appendToUserAddresses(user: userNew as? User, address: "")
+        return userNew as? User
+    }
+    
+    func updateUser(name: String, phone: String, email: String, delivery: Int, payment: Int) -> ReturnResult{
+        var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
+        let fetchRequest: NSFetchRequest<User> = User.fetchRequest()
+        // извлекаем из контекста
+        do {
+            let users = try context.fetch(fetchRequest)
+            if users.count == 0 {
+                user = createUser()
+            } else {
+                user = users.first
+            }
+            returnResult.count = users.count
+            user?.name = name
+            user?.email = email
+            user?.phone = phone
+            user?.delivery = Int32(delivery)
+            user?.payment = Int32(payment)
+            
+        } catch let error as NSError {
+            returnResult.error = "Ошибка изменения пользователя: \(error.localizedDescription)"
+            returnResult.count = -1
+        }
+        do {
+            try context.save()
+        } catch let error as NSError {
+            returnResult.error = "Ошибка сохранения изменения пользователя: \(error.localizedDescription)"
+            returnResult.count = -1
+            print(returnResult.error)
+        }
+        return returnResult
+    }
+    
+    func deleteUsersFromCoreData(context: NSManagedObjectContext) -> ReturnResult{
+        var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
+        let fetchRequest: NSFetchRequest<User> = User.fetchRequest()
+        // извлекаем из контекста
+        do {
+            let results = try context.fetch(fetchRequest)
+            for result in results {
+                returnResult.count += 1
+                context.delete(result)
+            }
+        } catch let error as NSError {
+            returnResult.error = "Ошибка удаления картинок товаров: \(error.localizedDescription)"
+            returnResult.count = -1
+            print(returnResult.error)
+        }
+        do {
+            try context.save()
+        } catch let error as NSError {
+            returnResult.error = "Ошибка сохранения удаления картинок товаров: \(error.localizedDescription)"
+            returnResult.count = -1
+            print(returnResult.error)
+        }
+        return returnResult
+    }
+    
+    //MARK: UserAddress
+    
+    func loadUserAddressFromCoreData(context: NSManagedObjectContext) -> ReturnResult {
+        var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
+        let fetchRequest: NSFetchRequest<UserAddress> = UserAddress.fetchRequest()
+        // извлекаем из контекста
+        do {
+            userAddresses = try context.fetch(fetchRequest)
+            returnResult.count = userAddresses.count
+        } catch let error as NSError {
+            returnResult.error = "Ошибка извлечения пользователя: \(error.localizedDescription)"
+            returnResult.count = -1
+        }
+        return returnResult
+    }
+    
+    func appendToUserAddresses(user: User?, address: String) -> ReturnResult {
+        var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
+        let _ = deleteUserAddresssesFromCoreData(context: context)
+        guard let entity =  NSEntityDescription.entity(forEntityName: "UserAddress", in: context) else { return returnResult}
+        let userAddressNew = NSManagedObject(entity: entity, insertInto: context)
+        userAddressNew.setValue(Int32(userAddresses.count), forKey: "id")
+        userAddressNew.setValue(address, forKey: "address")
+        userAddressNew.setValue(user, forKey: "user")
+        do {
+            try context.save()
+        } catch let error as NSError {
+            returnResult.error = "Ошибка сохранения изменения пользователя: \(error.localizedDescription)"
+            returnResult.count = -1
+            print(returnResult.error)
+        }
+        userAddresses.removeAll()
+        userAddresses.append(userAddressNew as! UserAddress)
+        return returnResult
+    }
+    
+    func deleteUserAddresssesFromCoreData(context: NSManagedObjectContext) -> ReturnResult{
+        var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
+        let fetchRequest: NSFetchRequest<UserAddress> = UserAddress.fetchRequest()
+        // извлекаем из контекста
+        do {
+            let results = try context.fetch(fetchRequest)
+            for result in results {
+                returnResult.count += 1
+                context.delete(result)
+            }
+        } catch let error as NSError {
+            returnResult.error = "Ошибка удаления картинок товаров: \(error.localizedDescription)"
+            returnResult.count = -1
+            print(returnResult.error)
+        }
+        do {
+            try context.save()
+        } catch let error as NSError {
+            returnResult.error = "Ошибка сохранения удаления картинок товаров: \(error.localizedDescription)"
+            returnResult.count = -1
+            print(returnResult.error)
+        }
+        return returnResult
+    }
+
     
 }
 

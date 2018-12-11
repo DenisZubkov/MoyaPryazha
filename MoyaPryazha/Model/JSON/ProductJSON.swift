@@ -16,6 +16,7 @@ struct ProductJSON: Codable {
     let description: String
     let ordered: String
     let categoryId: String
+    let noShow: String
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -25,6 +26,7 @@ struct ProductJSON: Codable {
         case description
         case ordered
         case categoryId
+        case noShow = "published"
     }
     
 }

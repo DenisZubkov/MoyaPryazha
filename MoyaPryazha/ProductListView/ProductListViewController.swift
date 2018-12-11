@@ -28,7 +28,7 @@ class ProductListViewController: UIViewController, UITableViewDelegate, UITableV
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        context = coreDataStack.persistentContainer.viewContext
+        context = rootViewController.context
         navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
         navigationController?.navigationBar.shadowImage = UIImage()
         tabBarController?.tabBar.tintColor = .white
@@ -52,7 +52,9 @@ class ProductListViewController: UIViewController, UITableViewDelegate, UITableV
         productListTableView.tableFooterView = UIView(frame: CGRect.zero)
     }
     
-    
+    override func viewDidAppear(_ animated: Bool) {
+        productListTableView.reloadData()
+    }
     
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -75,17 +77,58 @@ class ProductListViewController: UIViewController, UITableViewDelegate, UITableV
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = productListTableView.dequeueReusableCell(withIdentifier: "ProductCell", for: indexPath) as! ProductListTableViewCell
-        cell.siteButton.layer.cornerRadius = 15
         let product = productsToDisplayAt(indexPath: indexPath)
+        cell.tabBar = tabBarController // for control icon basket badge in tabBar from cell actions
+        cell.product = product // for send product to ProductListTableViewCell
         cell.nameLabel.text = product.name
+        cell.context = context
+        //quantity setup
+        cell.quantityTextField.isEnabled = false
+        let quantityInBasket = Int(rootViewController.baskets.filter({$0.product == product}).first?.quantity ?? 0)
+        cell.quantityInBasket = quantityInBasket
+        if quantityInBasket == 0 {
+            cell.quantityTextField.text = ""
+            cell.quantityTextField.backgroundColor = #colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
+            cell.quantityTextField.textColor = #colorLiteral(red: 0.4044061303, green: 0.6880503297, blue: 0.001034987159, alpha: 1)
+        } else {
+            cell.quantityTextField.text = "\(quantityInBasket)"
+            cell.quantityTextField.backgroundColor = #colorLiteral(red: 0.4044061303, green: 0.6880503297, blue: 0.001034987159, alpha: 1)
+            cell.quantityTextField.textColor = #colorLiteral(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
+        }
+        
+        cell.quantityStepper.value = Double(quantityInBasket)
+        
+        
+        
+        
+        // price setup
         if let price = rootViewController.prices.filter({$0.product == product && $0.priceType?.id ?? 1 == 1}).first?.price {
-            if price == 0 {
-                cell.priceLabel.text = "Под заказ"
+            cell.price = Int(price)
+            if cell.price == 0 {
+                cell.basketStackView.isHidden = true
+                cell.orderButton.isHidden = false
+                cell.orderButton.layer.cornerRadius = 5
             } else{
-                cell.priceLabel.text = "\(price) руб."
+                cell.basketStackView.isHidden = false
+                cell.orderButton.isHidden = true
+                cell.currencyLabel.text = "руб"
+                cell.priceLabel.text = String(cell.price)
             }
         }
-        cell.previewImage.image = nil
+        
+        
+        //sum setup
+        if quantityInBasket == 0 {
+            cell.sumLabel.text = ""
+            cell.currencySumLabel.text = ""
+            
+        } else {
+            cell.sumLabel.text = String(cell.price * quantityInBasket)
+            cell.currencySumLabel.text = "руб"
+        }
+        
+        // image setup
+        cell.previewImage.image = UIImage(named: "blank")
         if let thumbnail = product.thumbnail {
             cell.previewImage.image = UIImage(data: thumbnail)
         } else {
@@ -160,10 +203,11 @@ class ProductListViewController: UIViewController, UITableViewDelegate, UITableV
     
     func filterContentFor(searchText text: String) {
         filteredResultArray = viewProducts.filter { (product) -> Bool in
-            if (product.name?.lowercased().contains(text.lowercased()))! ||
-                (product.category?.name!.lowercased().contains(text.lowercased()))!
-            {
-                return true
+            if let productName = product.name?.lowercased().contains(text.lowercased()),
+                let categoryName = product.category?.name!.lowercased().contains(text.lowercased()) {
+                if productName || categoryName {
+                    return true
+                }
             }
             return false
             
