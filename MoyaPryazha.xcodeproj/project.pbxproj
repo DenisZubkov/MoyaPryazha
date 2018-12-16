@@ -51,6 +51,7 @@
 		7ADFD93421370C6C00E19918 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7ADFD93221370C6C00E19918 /* Main.storyboard */; };
 		7ADFD93921370C6E00E19918 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 7ADFD93721370C6E00E19918 /* LaunchScreen.storyboard */; };
 		7ADFD9452137126B00E19918 /* Tovar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7ADFD9442137126B00E19918 /* Tovar.swift */; };
+		7AE00FC321C3BA270038B3E9 /* AddressDaData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AE00FC221C3BA270038B3E9 /* AddressDaData.swift */; };
 		7AE699EA21457A03000DC949 /* LastModified.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AE699E921457A03000DC949 /* LastModified.swift */; };
 		7AE9391B2157930D003C07BF /* ProductDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AE9391A2157930D003C07BF /* ProductDetailViewController.swift */; };
 		7AE9391D215793E4003C07BF /* ProductImageCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AE9391C215793E4003C07BF /* ProductImageCollectionViewCell.swift */; };
@@ -105,6 +106,7 @@
 		7ADFD93821370C6E00E19918 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		7ADFD93A21370C6E00E19918 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7ADFD9442137126B00E19918 /* Tovar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tovar.swift; sourceTree = "<group>"; };
+		7AE00FC221C3BA270038B3E9 /* AddressDaData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddressDaData.swift; sourceTree = "<group>"; };
 		7AE699E921457A03000DC949 /* LastModified.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastModified.swift; sourceTree = "<group>"; };
 		7AE9391A2157930D003C07BF /* ProductDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductDetailViewController.swift; sourceTree = "<group>"; };
 		7AE9391C215793E4003C07BF /* ProductImageCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductImageCollectionViewCell.swift; sourceTree = "<group>"; };
@@ -145,6 +147,7 @@
 				7A11F3C9214ED4A0005184F7 /* HitJSON.swift */,
 				7A11F3CB214ED4B6005184F7 /* ProductPictureJSON.swift */,
 				7A3D3AEE21A473700049B225 /* AddressYandex.swift */,
+				7AE00FC221C3BA270038B3E9 /* AddressDaData.swift */,
 			);
 			path = JSON;
 			sourceTree = "<group>";
@@ -160,10 +163,18 @@
 			isa = PBXGroup;
 			children = (
 				7A1ECD7021A5DC520089C053 /* OrderTableViewController.swift */,
+				7A9DF22921C03A1F00457264 /* AddressView */,
+			);
+			path = OrderView;
+			sourceTree = "<group>";
+		};
+		7A9DF22921C03A1F00457264 /* AddressView */ = {
+			isa = PBXGroup;
+			children = (
 				7A3D3AEA21A315FF0049B225 /* AddressViewController.swift */,
 				7A3D3AEC21A317720049B225 /* AddressTableViewController.swift */,
 			);
-			path = OrderView;
+			path = AddressView;
 			sourceTree = "<group>";
 		};
 		7AAC05B0214520B0004AB93D /* Model */ = {
@@ -386,6 +397,7 @@
 				7A720C93214D97240031EA86 /* LoadViewController.swift in Sources */,
 				7AE699EA21457A03000DC949 /* LastModified.swift in Sources */,
 				7A18B6BB2145015A00ED55A7 /* DataProvider.swift in Sources */,
+				7AE00FC321C3BA270038B3E9 /* AddressDaData.swift in Sources */,
 				7AE9391F2157AEEB003C07BF /* ProductDetailTableViewCell.swift in Sources */,
 				7A699163218785AB0032FD70 /* ReturnData.swift in Sources */,
 				7ADFD9452137126B00E19918 /* Tovar.swift in Sources */,
@@ -555,6 +567,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = KA9VGY5669;
 				INFOPLIST_FILE = MoyaPryazha/Info.plist;
@@ -565,6 +578,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "ru.moya-pryazha.MoyaPryazha";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -576,6 +590,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = KA9VGY5669;
 				INFOPLIST_FILE = MoyaPryazha/Info.plist;
@@ -586,6 +601,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "ru.moya-pryazha.MoyaPryazha";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

@@ -28,6 +28,7 @@ class OrderTableViewController: UITableViewController, UITextFieldDelegate, MFMa
     @IBOutlet weak var paymentSegmentControl: UISegmentedControl!
     @IBOutlet weak var addAddressButton: UIButton!
     @IBOutlet weak var deliveryLabel: UILabel!
+    @IBOutlet weak var orderButton: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -55,6 +56,8 @@ class OrderTableViewController: UITableViewController, UITextFieldDelegate, MFMa
         titleLabel.minimumScaleFactor = 0.75 // Минимальный относительный размер шрифта
         navigationItem.titleView = titleLabel
         deliverySegmentControl.selectedSegmentIndex = 2
+        orderButton.layer.cornerRadius = 5
+        addAddressButton.layer.cornerRadius = 5
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -68,6 +71,7 @@ class OrderTableViewController: UITableViewController, UITextFieldDelegate, MFMa
         deliverySegmentControl.selectedSegmentIndex = Int(rootViewController.user?.delivery ?? 2)
         paymentSegmentControl.selectedSegmentIndex = Int(rootViewController.user?.payment ?? 1)
         navigationItem.rightBarButtonItem?.isEnabled = checkOrderData()
+        orderButton.isEnabled = checkOrderData()
         tableView.reloadData()
         updateStatePayment()
     }
@@ -82,8 +86,17 @@ class OrderTableViewController: UITableViewController, UITextFieldDelegate, MFMa
         let _ = rootViewController.appendToUserAddresses(user: rootViewController.user, address: dvc.addressString)
         addressTextView.text = dvc.addressString
     }
+    @IBAction func sendOrderButton(_ sender: UIButton) {
+        prepareOrder()
+    }
     
     @IBAction func orderConfirmedBarButtonItem(_ sender: UIBarButtonItem) {
+        
+        prepareOrder()
+    }
+    
+    func prepareOrder() {
+        
         let _ = saveUserDataToCoreData()
         //sendOrder()
         let message = sendOrderViaSite()
@@ -107,7 +120,6 @@ class OrderTableViewController: UITableViewController, UITextFieldDelegate, MFMa
         
         alertData.addAction(cancelAction)
         present(alertData, animated: true, completion: nil)
-        
     }
     
     func sendOrder() {
@@ -263,6 +275,7 @@ class OrderTableViewController: UITableViewController, UITextFieldDelegate, MFMa
     
     @IBAction func textFieldChanged(_ sender: UITextField) {
         navigationItem.rightBarButtonItem?.isEnabled = checkOrderData()
+        orderButton.isEnabled = checkOrderData()
     }
     
     @IBAction func changedDeliverySegmentControl(_ sender: UISegmentedControl) {

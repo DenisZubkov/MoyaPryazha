@@ -11,16 +11,16 @@ import MapKit
 
 protocol HandleMapSearch {
     func dropPinZoomIn(placemark:MKPlacemark, addressString: String)
+    func saveAddress(addressString: String)
 }
 
 class AddressViewController: UIViewController {
     
     
     var selectedPin:MKPlacemark? = nil
-    let locationManager = CLLocationManager()
+ //   let locationManager = CLLocationManager()
     var addressString = ""
-    
-    var resultSearchController:UISearchController? = nil
+    var resultSearchController: UISearchController? = nil
     
     
     @IBOutlet weak var mapView: MKMapView!
@@ -28,17 +28,23 @@ class AddressViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        locationManager.delegate = self 
-        locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        locationManager.requestWhenInUseAuthorization()
-        locationManager.requestLocation()
+//        locationManager.delegate = self
+//        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+//        locationManager.requestWhenInUseAuthorization()
+//        locationManager.requestLocation()
         
         let locationSearchTable = storyboard!.instantiateViewController(withIdentifier: "AddressTableViewController") as! AddressTableViewController
         resultSearchController = UISearchController(searchResultsController: locationSearchTable)
         resultSearchController?.searchResultsUpdater = locationSearchTable
         let searchBar = resultSearchController!.searchBar
+        let textFieldInsideUISearchBar = searchBar.value(forKey: "searchField") as? UITextField
+        //textFieldInsideUISearchBar?.textColor = UIColor.red
+        textFieldInsideUISearchBar?.font = textFieldInsideUISearchBar?.font?.withSize(12)
         searchBar.sizeToFit()
-        searchBar.placeholder = "Найти адрес"
+        searchBar.placeholder = "Введите адрес"
+        searchBar.setValue("Ok", forKey: "cancelButtonText")
+        locationSearchTable.searchController = resultSearchController
+            
         navigationItem.titleView = resultSearchController?.searchBar
         resultSearchController?.hidesNavigationBarDuringPresentation = false
         resultSearchController?.dimsBackgroundDuringPresentation = true
@@ -61,27 +67,27 @@ class AddressViewController: UIViewController {
 
 }
 
-extension AddressViewController: CLLocationManagerDelegate {
-    
-    
-    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
-        if status == .authorizedWhenInUse {
-            locationManager.requestLocation()
-        }
-    }
-    
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        if let location = locations.first {
-            let span = MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
-            let region = MKCoordinateRegion(center: location.coordinate, span: span)
-            mapView.setRegion(region, animated: true)
-        }
-    }
-    
-     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        print("error:: \(error)")
-    }
-}
+//extension AddressViewController: CLLocationManagerDelegate {
+//    
+//    
+//    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
+//        if status == .authorizedWhenInUse {
+//            locationManager.requestLocation()
+//        }
+//    }
+//    
+//    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+//        if let location = locations.first {
+//            let span = MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
+//            let region = MKCoordinateRegion(center: location.coordinate, span: span)
+//            mapView.setRegion(region, animated: true)
+//        }
+//    }
+//    
+//     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+//        print("error:: \(error)")
+//    }
+//}
 
 extension AddressViewController: HandleMapSearch {
     func dropPinZoomIn(placemark:MKPlacemark, addressString: String){
@@ -101,5 +107,9 @@ extension AddressViewController: HandleMapSearch {
         let span = MKCoordinateSpan(latitudeDelta: 0.005, longitudeDelta: 0.005)
         let region = MKCoordinateRegion(center: placemark.coordinate, span: span)
         mapView.setRegion(region, animated: true)
+    }
+    
+    func saveAddress(addressString: String) {
+        self.addressString = addressString
     }
 }

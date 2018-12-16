@@ -80,7 +80,7 @@ class LoadViewController: UIViewController {
         performSegue(withIdentifier: "ToMainSegue", sender: nil)
     }
     
-    // MARG: FIRSTLOAD
+    // MARK: FIRSTLOAD
     
     func loadFromFile(fileName: String, fileExtenition: String) -> Data? {
         if let path = Bundle.main.path(forResource: fileName, ofType: fileExtenition) {

@@ -50,6 +50,7 @@ class ProductListViewController: UIViewController, UITableViewDelegate, UITableV
         }
         viewProducts = viewProducts.sorted(by: {$0.id < $1.id})
         productListTableView.tableFooterView = UIView(frame: CGRect.zero)
+        
     }
     
     override func viewDidAppear(_ animated: Bool) {

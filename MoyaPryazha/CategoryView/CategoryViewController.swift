@@ -82,12 +82,12 @@ class CategoryViewController: UIViewController, UITableViewDataSource, UITableVi
         cell.thumbnailImage.layer.borderWidth = 3
         cell.thumbnailImage.layer.borderColor = #colorLiteral(red: 0.9882352941, green: 0.6470588235, blue: 0.02352941176, alpha: 1)
         cell.thumbnailImage.clipsToBounds = true
-        cell.thumbnailImage.image = UIImage(named: "blank")
         cell.loadActivityIndicator.isHidden = true
         cell.loadActivityIndicator.stopAnimating()
         let category = viewCategories[indexPath.row]
         cell.nameLabel.text = category.name
         if category.thumbnail == nil {
+            cell.thumbnailImage.image = UIImage(named: "blank")
             if let url = category.thumbnailPath {
                 if let imageURL = URL(string: "\(globalSettings.moyaPryazhaSite)\(url.replacingOccurrences(of: " ", with: "%20"))") {
                     cell.loadActivityIndicator.isHidden = false
