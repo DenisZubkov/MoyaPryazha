@@ -32,6 +32,7 @@ class LoadViewController: UIViewController {
     var productPictures: [ProductPicture] = []
     var resultsCoreData: [ReturnResult] = []
     var resultsServer: [ReturnData] = []
+    var dataProvider = DataProvider()
     
     
     override func viewDidLoad() {
@@ -46,41 +47,16 @@ class LoadViewController: UIViewController {
         let _ = loadBasketsFromCoreData(context: context)
         if lastModifiedDateFromMemory == nil {
             parceFile()
+        } else {
+            let _ = loadDataFromCoreData()
         }
-        resultsServer = loadDataFromServer()
-            var lastModifiedDateFromServer: Date?
-            let dataLastModifiedDate = resultsServer.filter{$0.dataType == .lastModified}
-            if let data = dataLastModifiedDate.first?.data {
-                lastModifiedDateFromServer = parceLastModifiedDate(data: data)
-            }
-            if lastModifiedDateFromMemory == nil {
-                parceJSON()
-                UserDefaults.standard.set(lastModifiedDateFromServer, forKey: "LastModified")
-            } else {
-                if let lastModifiedDateFromServer = lastModifiedDateFromServer {
-                    if lastModifiedDateFromMemory! < lastModifiedDateFromServer {
-                        parceJSON()
-                        UserDefaults.standard.set(lastModifiedDateFromServer, forKey: "LastModified")
-                    } else {
-                        resultsCoreData = loadDataFromCoreData()
-                    }
-                } else {
-                    resultsCoreData = loadDataFromCoreData()
-                }
-            }
-            //        for result in resultsCoreData {
-            //            print("ResultCoreData: \(result.count) \(result.error)")
-            //        }
-            //        for result in resultsServer {
-            //            print("ResultServer: \(result.dataType) \(result.errorType.rawValue) \(result.description) \(result.data?.count ?? -1)")
-            //        }
-            loadActivity.isHidden = true
-            loadActivity.stopAnimating()
-        
+        loadDataFromServer()
+        loadActivity.isHidden = true
+        loadActivity.stopAnimating()
         performSegue(withIdentifier: "ToMainSegue", sender: nil)
     }
     
-    // MARK: FIRSTLOAD
+    // MARK: LOAD FROM FILE
     
     func loadFromFile(fileName: String, fileExtenition: String) -> Data? {
         if let path = Bundle.main.path(forResource: fileName, ofType: fileExtenition) {
@@ -95,72 +71,66 @@ class LoadViewController: UIViewController {
     }
     
     func parceFile() {
-        context = coreDataStack.persistentContainer.viewContext
+        //context = coreDataStack.persistentContainer.viewContext
+        if let data = loadFromFile(fileName: "LastModified", fileExtenition: "json") {
+            UserDefaults.standard.set(data, forKey: "LastModified")
+        }
+        
         if let data = loadFromFile(fileName: "Categories", fileExtenition: "json") {
             let _ = parceCategories(from: data, to: context)
         }
         let _ = loadCategoriesFromCoreData(context: context)
-        //print("Category File: \(loadResult.count) \(loadResult.error)")
         
         if let data = loadFromFile(fileName: "Products", fileExtenition: "json") {
             let _ = parceProducts(from: data, to: context)
             
         }
         let _ = loadProductsFromCoreData(context: context)
-        //print("Product File: \(loadResult.count) \(loadResult.error)")
         
-       if let data = loadFromFile(fileName: "Currencies", fileExtenition: "json") {
+        if let data = loadFromFile(fileName: "Currencies", fileExtenition: "json") {
             let _ = parceCurrencies(from: data, to: context)
         }
         let _ = loadCurrenciesFromCoreData(context: context)
-        //print("Currency File: \(loadResult.count) \(loadResult.error)")
         
         let _ = parcePriceType(to: context)
         let _ = loadPriceTypesFromCoreData(context: context)
-        //print("PriceType File: \(loadResult.count) \(loadResult.error)")
         
         if let data = loadFromFile(fileName: "Prices", fileExtenition: "json") {
             let _ = parcePrices(from: data, to: context)
         }
         let _ = loadPricesFromCoreData(context: context)
-        //print("Prices File: \(loadResult.count) \(loadResult.error)")
         
         if let data = loadFromFile(fileName: "Parameters", fileExtenition: "json") {
             let _ = parceParameters(from: data, to: context)
         }
         let _ = loadParametersFromCoreData(context: context)
-        //print("Parameters File: \(loadResult.count) \(loadResult.error)")
         
         if let data = loadFromFile(fileName: "ProductParameters", fileExtenition: "json") {
             let _ = parceProductParameters(from: data, to: context)
         }
         let _ = loadProductParametersFromCoreData(context: context)
-        //print("Product Parameters File: \(loadResult.count) \(loadResult.error)")
         
         if let data = loadFromFile(fileName: "Hits", fileExtenition: "json") {
             let _ = parceHits(from: data, to: context)
         }
         let _ = loadHitsFromCoreData(context: context)
-        //print("Hits File: \(loadResult.count) \(loadResult.error)")
         
         if let data = loadFromFile(fileName: "ProductPictures", fileExtenition: "json") {
             let _ = parceProductPictures(from: data, to: context)
         }
         let _ = loadProductPicturesFromCoreData(context: context)
-        //print("Product Pictures File: \(loadResult.count) \(loadResult.error)")
         
         if let data = loadFromFile(fileName: "LastModified", fileExtenition: "json") {
             let date = parceLastModifiedDate( data: data)
             UserDefaults.standard.set(date, forKey: "LastModified")
         }
         let _ = loadProductsFromCoreData(context: context)
-        //UserDefaults.standard.set(loadResult, forKey: "LoadResult")
         let _ = loadUserFromCoreData(context: context)
         let _ = loadUserAddressFromCoreData(context: context)
 
     }
     
-    // MARK: LOADMODEL
+    // MARK: LOAD FROM SERVER
     
     func loadDataFromCoreData() -> [ReturnResult] {
         var results: [ReturnResult] = []
@@ -177,39 +147,71 @@ class LoadViewController: UIViewController {
         return results
     }
     
-    func loadDataFromServer() -> [ReturnData] {
-        var results: [ReturnData] = []
-        for source in globalSettings.modelSources {
-            var result = ReturnData.init(dataType: source.key, errorType: .network, description: "Некорректный URL-адрес", data: nil)
-            let urlSource = globalSettings.moyaPryazhaSite + globalSettings.moyaPryazhaServicesPath + source.value
-            if let url = URL(string: urlSource) {
-                result = getData(url: url, dataType: source.key)
-            }
-            results.append(result)
-        }
-        var resultServer = results.filter{($0.data?.count ?? 0 == 0 || $0.errorType != .none)}
-        if resultServer.count > 0 {
-            loadActivity.isHidden = true
-            loadActivity.stopAnimating()
-            let alertData = UIAlertController(title: resultServer.first?.errorType.rawValue, message: "\(resultServer.first?.description ?? "") \n Попробуйте позже", preferredStyle: .alert)
-            let cancelAction = UIAlertAction(title: "Повторить", style: .default)
-            {
-                (action: UIAlertAction) -> Void in
-                self.loadActivity.isHidden = false
-                self.loadActivity.startAnimating()
-                results = self.loadDataFromServer()
-                resultServer = results.filter{($0.data?.count ?? 0 == 0 || $0.errorType != .none)}
-                if resultServer.count == 0 {
-                    self.performSegue(withIdentifier: "ToMainSegue", sender: nil)
+    
+    
+    func loadFromServerOneSource(key: DataType , context: NSManagedObjectContext) {
+        var result = ReturnData.init(dataType: key, errorType: .network, description: "Некорректный URL-адрес", data: nil)
+        guard let value = globalSettings.modelSources.filter({$0.key == key}).first?.value else { return }
+        let urlSource = globalSettings.moyaPryazhaSite + globalSettings.moyaPryazhaServicesPath + value
+        if let url = URL(string: urlSource) {
+            //result = getData(url: url, dataType: source.key)
+            dataProvider.downloadData(url: url) { data in
+                if let data = data {
+                    result = ReturnData.init(dataType: key, errorType: .none, description: "Ok", data: data)
+                    switch key {
+                    case .category:
+                        let _ = self.parceCategories(from: data, to: self.context)
+                        let _ = self.loadCategoriesFromCoreData(context: self.context)
+                    case .product:
+                        let _ = self.parceProducts(from: data, to: self.context)
+                        let _ = self.loadProductsFromCoreData(context: self.context)
+                    case .currency:
+                        let _ = self.parceCurrencies(from: data, to: self.context)
+                        let _ = self.loadCurrenciesFromCoreData(context: self.context)
+                    case .hit:
+                        let _ = self.parceHits(from: data, to: self.context)
+                        let _ = self.loadHitsFromCoreData(context: self.context)
+                    case .lastModified:
+                        let _ = self.parceLastModifiedDate(data: data)
+                    case .parameter:
+                        let _ = self.parceParameters(from: data, to: self.context)
+                        let _ = self.loadParametersFromCoreData(context: self.context)
+                    case .price:
+                        let _ = self.parcePrices(from: data, to: self.context)
+                        let _ = self.loadPricesFromCoreData(context: self.context)
+                    case .productParameter:
+                        let _ = self.parceProductParameters(from: data, to: self.context)
+                        let _ = self.loadProductParametersFromCoreData(context: self.context)
+                    case .productPicture:
+                        let _ = self.parceProductPictures(from: data, to: self.context)
+                        let _ = self.loadProductPicturesFromCoreData(context: self.context)
+                    }
+                    
+                } else {
+                    result = ReturnData.init(dataType: key, errorType: .network, description: "Ошибка соединения с сервером...", data: data)
                 }
+                let resultServer = self.resultsServer.filter{$0.dataType == key}
+                if resultServer.count != 0 {
+                    for index in 0..<self.resultsServer.count {
+                        if result.dataType == key {
+                            self.resultsServer.remove(at: index)
+                            break
+                        }
+                    }
+                }
+                self.resultsServer.append(result)
+                //print(result)
             }
-            alertData.addAction(cancelAction)
-            self.present(alertData, animated: true, completion: nil)
         }
-
-        return results
     }
     
+    func loadDataFromServer() {
+        //context = coreDataStack.persistentContainer.viewContext
+        for source in globalSettings.modelSources {
+            loadFromServerOneSource(key: source.key, context: context)
+            //print(result)
+        }
+    }
     
     func parceJSON() {
         context = coreDataStack.persistentContainer.viewContext
@@ -219,7 +221,6 @@ class LoadViewController: UIViewController {
             let _ = parceCategories(from: data, to: context)
         }
         let _ = loadCategoriesFromCoreData(context: context)
-        //print("Category CoreData: \(loadResult.count) \(loadResult.error)")
         
         result = resultsServer.filter{$0.dataType == .product}
         if let data = result.first?.data {
@@ -227,61 +228,54 @@ class LoadViewController: UIViewController {
             
         }
         let _ = loadProductsFromCoreData(context: context)
-        //print("Product CoreData: \(loadResult.count) \(loadResult.error)")
         
         result = resultsServer.filter{$0.dataType == .currency}
         if let data = result.first?.data {
             let _ = parceCurrencies(from: data, to: context)
         }
         let _ = loadCurrenciesFromCoreData(context: context)
-        //print("Currency CoreData: \(loadResult.count) \(loadResult.error)")
         
         let _ = parcePriceType(to: context)
         let _ = loadPriceTypesFromCoreData(context: context)
-        //print("PriceType CoreData: \(loadResult.count) \(loadResult.error)")
         
         result = resultsServer.filter{$0.dataType == .price}
         if let data = result.first?.data {
             let _ = parcePrices(from: data, to: context)
         }
         let _ = loadPricesFromCoreData(context: context)
-        //print("Prices CoreData: \(loadResult.count) \(loadResult.error)")
         
         result = resultsServer.filter{$0.dataType == .parameter}
         if let data = result.first?.data {
             let _ = parceParameters(from: data, to: context)
         }
         let _ = loadParametersFromCoreData(context: context)
-        //print("Parameters CoreData: \(loadResult.count) \(loadResult.error)")
         
         result = resultsServer.filter{$0.dataType == .productParameter}
         if let data = result.first?.data {
             let _ = parceProductParameters(from: data, to: context)
         }
         let _ = loadProductParametersFromCoreData(context: context)
-        //print("Product Parameters CoreData: \(loadResult.count) \(loadResult.error)")
         
         result = resultsServer.filter{$0.dataType == .hit}
         if let data = result.first?.data {
             let _ = parceHits(from: data, to: context)
         }
         let _ = loadHitsFromCoreData(context: context)
-        //print("Hits CoreData: \(loadResult.count) \(loadResult.error)")
         
         result = resultsServer.filter{$0.dataType == .productPicture}
         if let data = result.first?.data {
             let _ = parceProductPictures(from: data, to: context)
         }
         let _ = loadProductPicturesFromCoreData(context: context)
-        //print("Product Pictures CoreData: \(loadResult.count) \(loadResult.error)")
         
     }
     
     func getData(url: URL, dataType: DataType) -> ReturnData {
-        var returnData = ReturnData.init(dataType: dataType, errorType: .none, description: "", data: nil)
-        let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringLocalCacheData, timeoutInterval: 15)
+        var returnData = ReturnData.init(dataType: dataType, errorType: .timeout, description: "", data: nil)
+        let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringLocalCacheData, timeoutInterval: 10)
         var isLoad = false
         let dataTask = URLSession.shared.dataTask(with: request) { data, response, error in
+            
             if error != nil {
                 returnData.description = error?.localizedDescription ?? "Ошибка сервера"
                 returnData.errorType = .network
@@ -295,12 +289,16 @@ class LoadViewController: UIViewController {
                 if response.statusCode != 200 {
                     returnData.description = "\(response.statusCode)  \(HTTPURLResponse.localizedString(forStatusCode: response.statusCode)) "
                     returnData.errorType = .network
+                } else {
+                    returnData.description = "Данные получены"
+                    returnData.errorType = .none
+                    returnData.data = data
                 }
             } else {
                 returnData.description = "Нет ответа от сервера"
                 returnData.errorType = .network
             }
-            returnData.data = data
+            
             isLoad = true
         }
         dataTask.resume()
@@ -627,14 +625,19 @@ class LoadViewController: UIViewController {
     
     func addCurrenciesToCoreData(currencies: [CurrencyJSON], context: NSManagedObjectContext) -> ReturnResult{
         var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
-        var currencyCurrent: Currency!
         for currency in currencies {
-            currencyCurrent = Currency(context: context)
-            // присваиваем переданные свойства
-            currencyCurrent.id = Int32(currency.id) ?? 0
-            currencyCurrent.name = currency.name
-            currencyCurrent.code = currency.code
-            currencyCurrent.numericCode = Int32(currency.numericCode) ?? 0
+            guard let entity =  NSEntityDescription.entity(forEntityName: "Currency", in: context) else { break }
+            let currencyNew = NSManagedObject(entity: entity, insertInto: context)
+            currencyNew.setValue(Int32(currency.id) ?? 0, forKey: "id")
+            currencyNew.setValue(currency.name, forKey: "name")
+            currencyNew.setValue(Int32(currency.numericCode) ?? 0, forKey: "numericCode")
+            currencyNew.setValue(currency.code, forKey: "code")
+//            let currencyCurrent = Currency(context: context)
+//            // присваиваем переданные свойства
+//            currencyCurrent.id = Int32(currency.id) ?? 0
+//            currencyCurrent.name = currency.name
+//            currencyCurrent.code = currency.code
+//            currencyCurrent.numericCode = Int32(currency.numericCode) ?? 0
             returnResult.count += returnResult.count
             
         }
@@ -756,18 +759,27 @@ class LoadViewController: UIViewController {
         }
         return returnResult
     }
-
+    
+    
     func addPricesToCoreData(prices: [PriceJSON], context: NSManagedObjectContext) -> ReturnResult{
         var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
-        var priceCurrent: Price!
         for price in prices {
-            priceCurrent = Price(context: context)
-            // присваиваем переданные свойства
-            priceCurrent.id = Int32(price.id) ?? 0
-            priceCurrent.price = Float(price.price) ?? 0
+            guard let entity =  NSEntityDescription.entity(forEntityName: "Price", in: context) else { break }
+            let priceNew = NSManagedObject(entity: entity, insertInto: context)
+            priceNew.setValue(Int32(price.id) ?? 0, forKey: "id")
+            priceNew.setValue(Float(price.price) ?? 0, forKey: "price")
             let productId = Int32(price.productId) ?? 0
-            priceCurrent.product = self.products.filter({$0.id == productId}).first
-            priceCurrent.priceType = self.priceTypes.filter({$0.id == 1}).first
+            let product = self.products.filter({$0.id == productId}).first
+            priceNew.setValue(product, forKey: "product")
+            let priceType = self.priceTypes.filter({$0.id == 1}).first
+            priceNew.setValue(priceType, forKey: "priceType")
+//            let priceCurrent = Price(context: context)
+//            // присваиваем переданные свойства
+//            priceCurrent.id = Int32(price.id) ?? 0
+//            priceCurrent.price = Float(price.price) ?? 0
+//            let productId = Int32(price.productId) ?? 0
+//            priceCurrent.product = self.products.filter({$0.id == productId}).first
+//            priceCurrent.priceType = self.priceTypes.filter({$0.id == 1}).first
             returnResult.count += returnResult.count
 
         }
@@ -850,14 +862,19 @@ class LoadViewController: UIViewController {
 
     func addParametersToCoreData(parameters: [ParameterJSON], context: NSManagedObjectContext) -> ReturnResult{
         var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
-        var parameterCurrent: Parameter!
         for parameter in parameters {
-            parameterCurrent = Parameter(context: context)
-            // присваиваем переданные свойства
-            parameterCurrent.id = Int32(parameter.id) ?? 0
-            parameterCurrent.name = parameter.title
-            parameterCurrent.order = Int32(parameter.id) ?? 0
-            parameterCurrent.tip = parameter.tip
+            guard let entity =  NSEntityDescription.entity(forEntityName: "Parameter", in: context) else { break }
+            let parameterNew = NSManagedObject(entity: entity, insertInto: context)
+            parameterNew.setValue(Int32(parameter.id) ?? 0, forKey: "id")
+            parameterNew.setValue(parameter.title, forKey: "name")
+            parameterNew.setValue(Int32(parameter.id) ?? 0, forKey: "order")
+            parameterNew.setValue(parameter.tip, forKey: "tip")
+//            let parameterCurrent = Parameter(context: context)
+//            // присваиваем переданные свойства
+//            parameterCurrent.id = Int32(parameter.id) ?? 0
+//            parameterCurrent.name = parameter.title
+//            parameterCurrent.order = Int32(parameter.id) ?? 0
+//            parameterCurrent.tip = parameter.tip
             returnResult.count += returnResult.count
 
         }
@@ -939,16 +956,25 @@ class LoadViewController: UIViewController {
 
     func addProductParametersToCoreData(productParameters: [ProductParameterJSON], context: NSManagedObjectContext) -> ReturnResult{
         var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
-        var productParameterCurrent: ProductParameter!
         for productParameter in productParameters {
-            productParameterCurrent = ProductParameter(context: context)
-            // присваиваем переданные свойства
-            productParameterCurrent.id = Int32(productParameter.id) ?? 0
-            productParameterCurrent.value = productParameter.value
+            guard let entity =  NSEntityDescription.entity(forEntityName: "ProductParameter", in: context) else { break }
+            let productParameterNew = NSManagedObject(entity: entity, insertInto: context)
+            productParameterNew.setValue(Int32(productParameter.id) ?? 0, forKey: "id")
+            productParameterNew.setValue(productParameter.value, forKey: "value")
             let productId = Int32(productParameter.productId) ?? 0
-            productParameterCurrent.product = self.products.filter({$0.id == productId}).first
+            let product = self.products.filter({$0.id == productId}).first
+            productParameterNew.setValue(product, forKey: "product")
             let parameterId = Int32(productParameter.parameterId) ?? 0
-            productParameterCurrent.parameter = self.parameters.filter({$0.id == parameterId}).first
+            let parameter = self.parameters.filter({$0.id == parameterId}).first
+            productParameterNew.setValue(parameter, forKey: "parameter")
+//            let productParameterCurrent = ProductParameter(context: context)
+//            // присваиваем переданные свойства
+//            productParameterCurrent.id = Int32(productParameter.id) ?? 0
+//            productParameterCurrent.value = productParameter.value
+//            let productId = Int32(productParameter.productId) ?? 0
+//            productParameterCurrent.product = self.products.filter({$0.id == productId}).first
+//            let parameterId = Int32(productParameter.parameterId) ?? 0
+//            productParameterCurrent.parameter = self.parameters.filter({$0.id == parameterId}).first
             
             returnResult.count += returnResult.count
 
@@ -1032,13 +1058,18 @@ class LoadViewController: UIViewController {
 
     func addHitsToCoreData(hits: [HitJSON], context: NSManagedObjectContext) -> ReturnResult{
         var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
-        var hitCurrent: Hit!
         for hit in hits {
-            hitCurrent = Hit(context: context)
-            // присваиваем переданные свойства
-            hitCurrent.order = Int32(hit.ordered) ?? 0
+            guard let entity =  NSEntityDescription.entity(forEntityName: "Hit", in: context) else { break }
+            let hitNew = NSManagedObject(entity: entity, insertInto: context)
+            hitNew.setValue(Float(hit.ordered) ?? 0, forKey: "order")
             let productId = Int32(hit.productId) ?? 0
-            hitCurrent.product = self.products.filter({$0.id == productId}).first
+            let product = self.products.filter({$0.id == productId}).first
+            hitNew.setValue(product, forKey: "product")
+//            let hitCurrent = Hit(context: context)
+//            // присваиваем переданные свойства
+//            hitCurrent.order = Int32(hit.ordered) ?? 0
+//            let productId = Int32(hit.productId) ?? 0
+//            hitCurrent.product = self.products.filter({$0.id == productId}).first
 
             returnResult.count += returnResult.count
 
@@ -1121,16 +1152,23 @@ class LoadViewController: UIViewController {
 
     func addProductPicturesToCoreData(productPictures: [ProductPictureJSON], context: NSManagedObjectContext) -> ReturnResult{
         var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
-        var productPictureCurrent: ProductPicture!
         for productPicture in productPictures {
-            productPictureCurrent = ProductPicture(context: context)
-            // присваиваем переданные свойства
-            productPictureCurrent.id = Int32(productPicture.id) ?? 0
-            productPictureCurrent.order = Int32(productPicture.ordered) ?? 0
-            productPictureCurrent.path = productPicture.path
+            guard let entity =  NSEntityDescription.entity(forEntityName: "ProductPicture", in: context) else { break }
+            let productPictureNew = NSManagedObject(entity: entity, insertInto: context)
+            productPictureNew.setValue(Int32(productPicture.id) ?? 0, forKey: "id")
+            productPictureNew.setValue(Float(productPicture.ordered) ?? 0, forKey: "order")
             let productId = Int32(productPicture.productId) ?? 0
-            productPictureCurrent.product = self.products.filter({$0.id == productId}).first
-            returnResult.count += returnResult.count
+            let product = self.products.filter({$0.id == productId}).first
+            productPictureNew.setValue(product, forKey: "product")
+            productPictureNew.setValue(productPicture.path, forKey: "path")
+//            let productPictureCurrent = ProductPicture(context: context)
+//            // присваиваем переданные свойства
+//            productPictureCurrent.id = Int32(productPicture.id) ?? 0
+//            productPictureCurrent.order = Int32(productPicture.ordered) ?? 0
+//            productPictureCurrent.path = productPicture.path
+//            let productId = Int32(productPicture.productId) ?? 0
+//            productPictureCurrent.product = self.products.filter({$0.id == productId}).first
+           returnResult.count += returnResult.count
 
         }
         do {
@@ -1143,7 +1181,7 @@ class LoadViewController: UIViewController {
         return returnResult
     }
     
-    //MARK: Basket
+    //MARK: BASKET
     
     func loadBasketsFromCoreData(context: NSManagedObjectContext) -> ReturnResult {
         var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
@@ -1210,7 +1248,7 @@ class LoadViewController: UIViewController {
         }
     }
     
-    //MARK: User
+    //MARK: USER
     
     func loadUserFromCoreData(context: NSManagedObjectContext) -> ReturnResult {
         var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")
@@ -1309,7 +1347,7 @@ class LoadViewController: UIViewController {
         return returnResult
     }
     
-    //MARK: UserAddress
+    //MARK: USER ADDRESS
     
     func loadUserAddressFromCoreData(context: NSManagedObjectContext) -> ReturnResult {
         var returnResult: ReturnResult = ReturnResult.init(count: 0, error: "Ok")

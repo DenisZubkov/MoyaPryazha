@@ -49,6 +49,13 @@ class AbutUsTableViewController: UITableViewController, MFMailComposeViewControl
         locationManager.startUpdatingLocation()
         
         
+        
+        
+        
+        
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
         mapView.delegate = self
         mapView.mapType = .standard
         mapView.isZoomEnabled = true
@@ -70,11 +77,7 @@ class AbutUsTableViewController: UITableViewController, MFMailComposeViewControl
         //pointAnnotation.subtitle = "\(rootViewController.globalSettings.moyaPryazhaAddress), \n Тел: \(rootViewController.globalSettings.moyaPryazhaPhone) \n Email: \(rootViewController.globalSettings.moyaPryazhaEmail)"
         pinAnnotationView = MKPinAnnotationView(annotation: pointAnnotation, reuseIdentifier: "pin")
         mapView.addAnnotation(pinAnnotationView.annotation!)
-        
-        
-        
     }
-    
     
     func sendMail(mail: String) {
         let mailComposeViewController = MFMailComposeViewController()

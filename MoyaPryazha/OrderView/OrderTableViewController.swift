@@ -67,9 +67,15 @@ class OrderTableViewController: UITableViewController, UITextFieldDelegate, MFMa
         emailTextField.text = rootViewController.user?.email
         phoneTextField.text = rootViewController.user?.phone
         let _ = rootViewController.loadUserAddressFromCoreData(context: context)
-        addressTextView.text = rootViewController.userAddresses.first?.address
+        
         deliverySegmentControl.selectedSegmentIndex = Int(rootViewController.user?.delivery ?? 2)
         paymentSegmentControl.selectedSegmentIndex = Int(rootViewController.user?.payment ?? 1)
+        if deliverySegmentControl.selectedSegmentIndex == 2 {
+            addressTextView.text = globalSettings.moyaPryazhaAddress
+        } else {
+            addressTextView.text = rootViewController.userAddresses.first?.address
+        }
+        
         navigationItem.rightBarButtonItem?.isEnabled = checkOrderData()
         orderButton.isEnabled = checkOrderData()
         tableView.reloadData()
@@ -95,31 +101,21 @@ class OrderTableViewController: UITableViewController, UITextFieldDelegate, MFMa
         prepareOrder()
     }
     
-    func prepareOrder() {
-        
-        let _ = saveUserDataToCoreData()
-        //sendOrder()
-        let message = sendOrderViaSite()
-        if message.count != -1 {
-            for basket in rootViewController.baskets {
-                let _ = rootViewController.putProductToBasket(product: basket.product, quantity: 0)
-            }
-            tabBarController?.tabBar.items?[2].badgeValue = "\(rootViewController.sumBasket())"
-            do {
-                try context.save()
-            } catch let error as NSError {
-                print(error)
-            }
-            
+    func emptyBasket() {
+        for basket in rootViewController.baskets {
+            let _ = rootViewController.putProductToBasket(product: basket.product, quantity: 0)
         }
-        let alertData = UIAlertController(title:"Обработка заказа", message: message.error, preferredStyle: .alert)
-        let cancelAction = UIAlertAction(title: "Ok", style: .default, handler:{
-            (_) in
-            self.performSegue(withIdentifier: "returnToBasketSegue", sender: self)
-        })
-        
-        alertData.addAction(cancelAction)
-        present(alertData, animated: true, completion: nil)
+        tabBarController?.tabBar.items?[2].badgeValue = "\(rootViewController.sumBasket())"
+        do {
+            try context.save()
+        } catch let error as NSError {
+            print(error)
+        }
+    }
+    
+    func prepareOrder() {
+        let _ = saveUserDataToCoreData()
+        let _ = sendOrderViaSite()
     }
     
     func sendOrder() {
@@ -144,6 +140,8 @@ class OrderTableViewController: UITableViewController, UITextFieldDelegate, MFMa
                 returnResiult.error = "Сервис отправки заказа не доступен. Попробуйте позже..."
                 return returnResiult
         }
+        returnResiult.count = -1
+        returnResiult.error = "Сервис отправки заказа не доступен. Попробуйте позже..."
         var emailSended = 0
         guard let name = rootViewController.user?.name
             else {
@@ -177,32 +175,43 @@ class OrderTableViewController: UITableViewController, UITextFieldDelegate, MFMa
         request.httpBody = httpBody
         let session = URLSession.shared
         let task = session.dataTask(with: request) { (data, response, error) in
-            
+            if let error = error {
+                returnResiult.count = -1
+                returnResiult.error = "Ошибка отправки: \(error.localizedDescription)"
+                emailSended = -1
+            }
             if let response = response as? HTTPURLResponse {
                 if response.statusCode == 200 {
                     if let postData = data,
                         let postString = String(data: postData, encoding: String.Encoding.utf8) {
                         if postString == "OK" {
                             emailSended = 1
+                            returnResiult.count = 0
+                            returnResiult.error = "Спасибо за заказ!\nВаш заказ получен.\nВ ближайшее время наш менеджер свяжется с Вами."
                         }
                     }
                 }
             }
             if emailSended != 1 {
                 emailSended = -1
-            }
-            
-        }
-        task.resume()
-        while emailSended == 0 {
-            if emailSended == -1 {
                 returnResiult.count = -1
                 returnResiult.error = "Сервис отправки заказа не доступен. Попробуйте позже..."
-            } else if emailSended == 1 {
-                returnResiult.count = 0
-                returnResiult.error = "Спасибо за заказ!\nВаш заказ получен.\nВ ближайшее время наш менеджер свяжется с Вами."
+            }
+            DispatchQueue.main.async {
+                let alertData = UIAlertController(title:"Обработка заказа", message: returnResiult.error, preferredStyle: .alert)
+                let cancelAction = UIAlertAction(title: "Ok", style: .default, handler:{
+                    (_) in
+                    if returnResiult.count == 0 {
+                        self.emptyBasket()
+                        self.performSegue(withIdentifier: "returnToBasketSegue", sender: self)
+                    }
+                })
+                
+                alertData.addAction(cancelAction)
+                self.present(alertData, animated: true, completion: nil)
             }
         }
+        task.resume()
         return returnResiult
     }
     
@@ -295,14 +304,24 @@ class OrderTableViewController: UITableViewController, UITextFieldDelegate, MFMa
             addAddressButton.isEnabled = false
             deliveryLabel.text = "Адрес самовывоза:"
         }
+        orderButton.isEnabled = checkOrderData()
+        navigationItem.rightBarButtonItem?.isEnabled = checkOrderData()
+        
     }
     
     func checkOrderData() -> Bool {
-        guard !addressTextView.text.isEmpty else { return false }
-        guard !(nameTextField.text?.isEmpty ?? true) else { return false }
-        guard !(phoneTextField.text?.isEmpty ?? true) else { return false }
-        guard !(emailTextField.text?.isEmpty ?? true) else { return false }
-        return true
+        if addressTextView.text == nil ||
+            addressTextView.text == "" ||
+            nameTextField.text == nil ||
+            nameTextField.text == "" ||
+            phoneTextField.text == nil ||
+            phoneTextField.text == "" ||
+            emailTextField.text == nil ||
+            emailTextField.text == "" {
+            return false
+        } else {
+            return true
+        }
     }
     
     func saveUserDataToCoreData() -> ReturnResult {

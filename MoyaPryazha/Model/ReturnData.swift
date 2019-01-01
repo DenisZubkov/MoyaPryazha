@@ -33,4 +33,5 @@ enum ErrorType: String {
     case json = "Ошибка данных"
     case empty = "Нет данных"
     case none = "Ок"
+    case timeout = "Сервер не отвечает..."
 }

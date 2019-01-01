@@ -105,16 +105,36 @@ class ProductListViewController: UIViewController, UITableViewDelegate, UITableV
         // price setup
         if let price = rootViewController.prices.filter({$0.product == product && $0.priceType?.id ?? 1 == 1}).first?.price {
             cell.price = Int(price)
-            if cell.price == 0 {
-                cell.basketStackView.isHidden = true
-                cell.orderButton.isHidden = false
-                cell.orderButton.layer.cornerRadius = 5
-            } else{
-                cell.basketStackView.isHidden = false
-                cell.orderButton.isHidden = true
-                cell.currencyLabel.text = "руб"
-                cell.priceLabel.text = String(cell.price)
+            
+        } else {
+           cell.price = -1
+            guard let value = globalSettings.modelSources.filter({$0.key == .price}).first?.value else { return cell}
+            let urlSource = globalSettings.moyaPryazhaSite + globalSettings.moyaPryazhaServicesPath + value
+            if let url = URL(string: urlSource) {
+                //result = getData(url: url, dataType: source.key)
+                dataProvider.downloadData(url: url) { data in
+                    if let data = data {
+                        let _ = self.rootViewController.parcePrices(from: data, to: self.context)
+                        let _ = self.rootViewController.loadPricesFromCoreData(context: self.context)
+                        if let price = self.rootViewController.prices.filter({$0.product == product && $0.priceType?.id ?? 1 == 1}).first?.price {
+                            DispatchQueue.main.async {
+                                cell.price = Int(price)
+                            }
+                        }
+                    }
+                }
             }
+           
+        }
+        if cell.price == 0 {
+            cell.basketStackView.isHidden = true
+            cell.orderButton.isHidden = false
+            cell.orderButton.layer.cornerRadius = 5
+        } else{
+            cell.basketStackView.isHidden = false
+            cell.orderButton.isHidden = true
+            cell.currencyLabel.text = "руб"
+            cell.priceLabel.text = String(cell.price)
         }
         
         
@@ -138,22 +158,19 @@ class ProductListViewController: UIViewController, UITableViewDelegate, UITableV
                     cell.loadImageActivityView.isHidden = false
                     cell.loadImageActivityView.startAnimating()
                     self.dataProvider.downloadImage(url: imageURL) { image in
-                        guard let image = image else {
-                            cell.loadImageActivityView.isHidden = true
-                            cell.loadImageActivityView.stopAnimating()
-                            return
+                        if let image = image {
+                            product.thumbnail = image.pngData()
+                            cell.previewImage.image = image
+                            do {
+                                try self.context.save()
+                            } catch let error as NSError {
+                                print(error)
+                            }
+                        } else {
+                            cell.previewImage.image = UIImage(named: "NoPhoto")
                         }
-                        cell.previewImage.image = image
-                        product.thumbnail = image.pngData()
-                        do {
-                            try self.context.save()
-                        } catch let error as NSError {
-                            print(error)
-                            cell.loadImageActivityView.isHidden = true
-                            cell.loadImageActivityView.stopAnimating()
-                        }
-                    cell.loadImageActivityView.isHidden = true
-                    cell.loadImageActivityView.stopAnimating()
+                        cell.loadImageActivityView.isHidden = true
+                        cell.loadImageActivityView.stopAnimating()
                     }
                 } else {
                     cell.previewImage.image = UIImage(named: "NoPhoto")
@@ -162,7 +179,6 @@ class ProductListViewController: UIViewController, UITableViewDelegate, UITableV
                 cell.previewImage.image = UIImage(named: "NoPhoto")
             }
         }
-        
         return cell
     }
     

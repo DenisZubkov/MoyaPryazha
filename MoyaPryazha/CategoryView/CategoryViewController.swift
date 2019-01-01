@@ -42,7 +42,7 @@ class CategoryViewController: UIViewController, UITableViewDataSource, UITableVi
         tabBarController?.tabBar.unselectedItemTintColor = UIColor.black
         tabBarController?.tabBar.items?[1].badgeColor = #colorLiteral(red: 0.4044061303, green: 0.6880503297, blue: 0.001034987159, alpha: 1)
         tabBarController?.tabBar.items?[2].badgeColor = #colorLiteral(red: 0.4044061303, green: 0.6880503297, blue: 0.001034987159, alpha: 1)
-        tabBarController?.tabBar.items?[1].badgeValue = "\(rootViewController.products.count)"
+        //tabBarController?.tabBar.items?[1].badgeValue = "\(rootViewController.products.count)"
         let sumBasket = self.rootViewController.sumBasket()
         if sumBasket == 0  {
             tabBarController?.tabBar.items?[2].badgeValue = nil
@@ -86,27 +86,25 @@ class CategoryViewController: UIViewController, UITableViewDataSource, UITableVi
         cell.loadActivityIndicator.stopAnimating()
         let category = viewCategories[indexPath.row]
         cell.nameLabel.text = category.name
-        if category.thumbnail == nil {
-            cell.thumbnailImage.image = UIImage(named: "blank")
+        cell.thumbnailImage.image = UIImage(named: "blank")
+        if let thumbnail = category.thumbnail {
+            cell.thumbnailImage.image = UIImage(data: thumbnail)
+        } else {
             if let url = category.thumbnailPath {
                 if let imageURL = URL(string: "\(globalSettings.moyaPryazhaSite)\(url.replacingOccurrences(of: " ", with: "%20"))") {
                     cell.loadActivityIndicator.isHidden = false
                     cell.loadActivityIndicator.startAnimating()
                     self.dataProvider.downloadImage(url: imageURL) { image in
-                        guard let image = image else {
-                            
-                            cell.loadActivityIndicator.isHidden = true
-                            cell.loadActivityIndicator.stopAnimating()
-                            return
-                        }
-                        cell.thumbnailImage.image = image
-                        category.thumbnail = image.pngData()
-                        do {
-                            try self.context.save()
-                        } catch let error as NSError {
-                            cell.loadActivityIndicator.isHidden = true
-                            cell.loadActivityIndicator.stopAnimating()
-                            print(error)
+                        if let image = image {
+                            category.thumbnail = image.pngData()
+                            cell.thumbnailImage.image = image
+                            do {
+                                try self.context.save()
+                            } catch let error as NSError {
+                                print(error)
+                            }
+                        } else {
+                            cell.thumbnailImage.image = UIImage(named: "NoPhoto")
                         }
                         cell.loadActivityIndicator.isHidden = true
                         cell.loadActivityIndicator.stopAnimating()
@@ -116,8 +114,6 @@ class CategoryViewController: UIViewController, UITableViewDataSource, UITableVi
                     cell.thumbnailImage.image = UIImage(named: "NoPhoto")
                 }
             }
-        } else {
-            cell.thumbnailImage.image = UIImage(data: viewCategories[indexPath.row].thumbnail!)
         }
         
         // Configure the cell...
@@ -137,9 +133,9 @@ class CategoryViewController: UIViewController, UITableViewDataSource, UITableVi
         if viewCategories.count != 0 {
             let title = currentViewCategories[indexPath.row].name
             titleLabel.text = title
-            tableView.reloadData()
             let indexPath = IndexPath(row: 0, section: 0)
             tableView.scrollToRow(at: indexPath, at: UITableView.ScrollPosition.middle, animated: true)
+            tableView.reloadData()
             willGoProducts = false
         } else {
             if let currentCategory = currentViewCategories.first?.parentId {
@@ -170,9 +166,10 @@ class CategoryViewController: UIViewController, UITableViewDataSource, UITableVi
             }
             backBarButtonItem.isEnabled = categoryLevel != 0
             backBarButtonItem.image = categoryLevel != 0 ? UIImage(named: "left") : nil
-            tableView.reloadData()
             let indexPath = IndexPath(row: 0, section: 0)
             tableView.scrollToRow(at: indexPath, at: UITableView.ScrollPosition.middle, animated: true)
+            tableView.reloadData()
+            
         }
         
         

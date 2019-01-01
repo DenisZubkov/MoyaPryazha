@@ -10,6 +10,7 @@ import UIKit
 
 class DataProvider {
     var imageCache = NSCache<NSString, UIImage>()
+    var dataCache = NSCache<NSString, NSData>()
     var hitProductsCash = NSCache<NSString, HitProducts>()
     var dateLastModified: String?
     
@@ -24,14 +25,14 @@ class DataProvider {
                 response.statusCode == 200,
                 let _ = self else {
                     DispatchQueue.main.async {
-                        completion(UIImage(named: "NoPhoto"))
+                        completion(nil)
                     }
                     return
             }
             
             guard let image = UIImage(data: data!) else {
                 DispatchQueue.main.async {
-                    completion(UIImage(named: "NoPhoto"))
+                    completion(nil)
                 }
                 return
             }
@@ -41,6 +42,32 @@ class DataProvider {
         }
         dataTask.resume()
         
+    }
+    
+    func downloadData(url:URL, completion: @escaping (Data?) -> Void) {
+        if let cachedData = dataCache.object(forKey: url.absoluteString as NSString),
+            let data = cachedData as Data? {
+                completion(data)
+        } else {
+        let request = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData, timeoutInterval: 10)
+        //URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.returnCacheDataElseLoad, timeoutInterval: 10)
+        let dataTask = URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            
+            guard error == nil,
+                data != nil,
+                let response = response as? HTTPURLResponse,
+                response.statusCode == 200,
+                let `self` = self else {
+                    return
+            }
+            guard let data = data else { return }
+            self.dataCache.setObject(data as NSData, forKey: url.absoluteString as NSString)
+            DispatchQueue.main.async {
+                completion(data)
+            }
+        }
+        dataTask.resume()
+        }
     }
     
     
